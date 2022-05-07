@@ -6,33 +6,26 @@ world.gravity.set(0, -9.82 * 100, 0); // *100 to scale into the world
 //Aryaa3D Setup
 linkCanvas("renderingWindow")
 const camera = new PerspectiveCamera();
-const cameraOffset = Vector( 0, 900, -1500 );
+const cameraOffset = Vector( 0, 600, -1200 );
 camera.rotation.x = 20;
 camera.updateRotationMatrix();
+camera.nearDistance = 1000;
 
 //GameHelper Setup
 enableKeyListeners();
 
-document.addEventListener('click', () => {
+document.addEventListener('click', () => { //full screen mode
     document.body.requestPointerLock();
-}, { once: true })
+}, { once: false })
 
 
 
 //Player
-const player = new PhysicsObject( world, new Box(100, 200, 100), new CANNON.Body( { mass: 1, material: new CANNON.Material() } ) )
-player.aShape.showOutline();
-player.cBody.position.set(200, 300, 2000);
-player.cBody.material.friction = 0.2;
-player.cBody.linearDamping = 0.31;
-player.cBody.angularDamping = 1;
+const player = new Player( world, camera);
+player.physicsObject.cBody.position.set(0, 300, 2000);
 
-/* //Will handle later, once I have added perspective in aryaa3D Source
-let playerOnGround = true; 
-player.cBody.addEventListener('collide', ($e: any) => {
-    console.log($e)
-})
-*/
+
+
 
 
 //Obstacles
@@ -43,42 +36,20 @@ base.aShape.setColour("orange");
 disc.aShape.setColour("#87deeb");
 disc.cBody.position.set(0, 100, 0);
 disc.cBody.angularVelocity.set( 0, 1, 0 );
+disc.cBody.id = -1;
 
 const discBodyContactMaterial = new CANNON.ContactMaterial( base.cBody.material, disc.cBody.material, { friction: 0 } );
 world.addContactMaterial(discBodyContactMaterial);
-
-
-
 
 //Platform
 const platform = new PhysicsObject( world, new Box(400, 10, 3000), new CANNON.Body( { mass: 0 } ) );
 platform.aShape.setColour("#ffff00");
 platform.aShape.showOutline();
 platform.cBody.position.set(0, 0, 1500);
-
-
-
+platform.cBody.id = -1;
 
 
 //Rotating Hammer
-
-
-
-
-
-//Thid Person Camera
-const rotationSensitivity = 0.1;
-document.body.onmousemove = ($e) => {
-    const yRotationQuaternion = eulerToQuaternion( Euler( 0, $e.movementX * rotationSensitivity, 0 ) );
-    const currentRotationQuaternion = { x: player.cBody.quaternion.x, y: player.cBody.quaternion.y, z: player.cBody.quaternion.z, w: player.cBody.quaternion.w };
-    const resultQuaternion = multiplyQuaternions( currentRotationQuaternion, yRotationQuaternion );
-    player.cBody.quaternion.set( resultQuaternion.x, resultQuaternion.y, resultQuaternion.z, resultQuaternion.w );
-
-    camera.rotation.y += $e.movementX * rotationSensitivity; //cant sync camera's rotation since we don't have access to the player's y rotation, only quaternion
-    camera.updateRotationMatrix();
-}
-
-
 
 
 
@@ -88,41 +59,30 @@ setInterval(() => {
 
     //Handle keysdown
     const pMovement = Vector(0, 0, 0);
-    const speed = 10;
-    const jumpHeight = 100;
     keysDown.forEach((key) => {
-        if (key == "w") {  pMovement.z += speed; }
-        else if (key == "s") { pMovement.z -= speed; }
-        else if (key == "a") { pMovement.x -= speed; }
-        else if (key == "d") { pMovement.x += speed; }
+        if (key == "w") {  pMovement.z += player.speed; }
+        else if (key == "s") { pMovement.z -= player.speed; }
+        else if (key == "a") { pMovement.x -= player.speed; }
+        else if (key == "d") { pMovement.x += player.speed; }
 
         else if (key == " ") { 
             //playerOnGround = false; //will handle validation later
-            pMovement.y += jumpHeight;
+            player.jump( player.jumpForce );
         }
     })
-    //need to multiply this vector by the player's rotation
-    const absoluteMovement = multiplyQuaternionVector( { x: player.cBody.quaternion.x, y: player.cBody.quaternion.y, z: player.cBody.quaternion.z, w: player.cBody.quaternion.w }, pMovement );
-    player.cBody.position.x += absoluteMovement.x;
-    player.cBody.position.z += absoluteMovement.z;
-    player.cBody.applyImpulse( new CANNON.Vec3( 0, pMovement.y, 0 ), player.cBody.position);
+    player.moveLocal( pMovement );
+
 
     world.step(16 / 1000);
 
     //Sync aryaa3D Shapes
-    player.syncAShape();
+    player.physicsObject.syncAShape();
+    player.syncCameraPosition( camera, cameraOffset );
+
     base.syncAShape();
     disc.syncAShape();
     platform.syncAShape();
-
-    //Sync Camera behind player, by rotating vector from player -> camera
-    const playerCameraVector = JSON.parse(JSON.stringify( cameraOffset ));
-    const inverseQuaternion = JSON.parse(JSON.stringify(player.aShape.quaternion));
-    inverseQuaternion.w *= 1;
-    const cameraPosition =  multiplyQuaternionVector( inverseQuaternion, playerCameraVector );
-    cameraPosition.x += player.aShape.position.x;
-    cameraPosition.z += player.aShape.position.z;
-    camera.position =  cameraPosition;
+    
 
     //Stop disc from falling off surface
     disc.cBody.position.x = 0;
@@ -131,5 +91,5 @@ setInterval(() => {
     clearCanvas();
     camera.render([base.aShape, platform.aShape]); //different y-values, since we limited rotation, the items will always be on top / parallel to each other
     camera.render([disc.aShape]);
-    camera.render([player.aShape]);
+    camera.render([player.physicsObject.aShape]);
 }, 16);
