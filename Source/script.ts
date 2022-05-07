@@ -6,7 +6,6 @@ world.gravity.set(0, -9.82 * 100, 0); // *100 to scale into the world
 //Aryaa3D Setup
 linkCanvas("renderingWindow")
 const camera = new PerspectiveCamera();
-const cameraOffset = Vector( 0, 600, -1200 );
 camera.rotation.x = 20;
 camera.updateRotationMatrix();
 camera.nearDistance = 1000;
@@ -22,34 +21,18 @@ document.addEventListener('click', () => { //full screen mode
 
 //Player
 const player = new Player( world, camera);
-player.physicsObject.cBody.position.set(0, 300, 2000);
+player.physicsObject.cBody.position.set(0, 500, 0);
 
 
 
 
 
-//Obstacles
-//Rotating Disc
-const base = new PhysicsObject( world, new Cylinder(100, 25), new CANNON.Body( { mass: 0, material: new CANNON.Material() } )); //not actually a cylinder, just looks like it
-const disc = new PhysicsObject( world, new Cylinder(500, 25), new CANNON.Body( { mass: 10000, material: new CANNON.Material( { friction: 1 } ), shape: new CANNON.Cylinder(400, 400, 25, 8) } ) );
-base.aShape.setColour("orange");
-disc.aShape.setColour("#87deeb");
-disc.cBody.position.set(0, 100, 0);
-disc.cBody.angularVelocity.set( 0, 1, 0 );
-disc.cBody.id = -1;
+//Obstacles, ordered in order of appearance in the Level
+const rotatingDisc1 = new RotatingDisc( world, { radius: 400 }, Vector(0, 0, 0));
 
-const discBodyContactMaterial = new CANNON.ContactMaterial( base.cBody.material, disc.cBody.material, { friction: 0 } );
-world.addContactMaterial(discBodyContactMaterial);
+const platform = new Platform( world, { width: 300, depth: 3000 }, Vector( 0, 0, 1500 ) );
 
-//Platform
-const platform = new PhysicsObject( world, new Box(400, 10, 3000), new CANNON.Body( { mass: 0 } ) );
-platform.aShape.setColour("#ffff00");
-platform.aShape.showOutline();
-platform.cBody.position.set(0, 0, 1500);
-platform.cBody.id = -1;
-
-
-//Rotating Hammer
+const rotatingDisc2 = new RotatingDisc( world, { radius: 400 }, Vector(0, 0, 3000));
 
 
 
@@ -66,8 +49,7 @@ setInterval(() => {
         else if (key == "d") { pMovement.x += player.speed; }
 
         else if (key == " ") { 
-            //playerOnGround = false; //will handle validation later
-            player.jump( player.jumpForce );
+            player.jump( player.jumpForce ); //validation happens inside player class
         }
     })
     player.moveLocal( pMovement );
@@ -77,19 +59,24 @@ setInterval(() => {
 
     //Sync aryaa3D Shapes
     player.physicsObject.syncAShape();
-    player.syncCameraPosition( camera, cameraOffset );
+    player.syncCameraPosition( camera, Vector( 0, 600, -1200 ) );
 
-    base.syncAShape();
-    disc.syncAShape();
-    platform.syncAShape();
-    
+    rotatingDisc1.update();
+    platform.update();
+    rotatingDisc2.update();
 
-    //Stop disc from falling off surface
-    disc.cBody.position.x = 0;
-    disc.cBody.position.z = 0;
-
+    //different y-values, since we limited rotation, the items will always be on top / parallel to each other
     clearCanvas();
-    camera.render([base.aShape, platform.aShape]); //different y-values, since we limited rotation, the items will always be on top / parallel to each other
-    camera.render([disc.aShape]);
-    camera.render([player.physicsObject.aShape]);
+    camera.render([ //Bottom Layer (platforms)
+        rotatingDisc1.base.aShape, 
+        platform.physicalObject.aShape,
+        rotatingDisc2.base.aShape
+    ]);
+    camera.render([ //Middle layer, for obstacles
+        rotatingDisc1.disc.aShape,
+        rotatingDisc2.disc.aShape
+    ]);
+    camera.render([ //Top layer, for rendering player
+        player.physicsObject.aShape
+    ]);
 }, 16);
