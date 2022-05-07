@@ -5,8 +5,9 @@ const world = new CANNON.World();
 world.gravity.set(0, -9.82 * 100, 0); // *100 to scale into the world
 //Aryaa3D Setup
 linkCanvas("renderingWindow");
-const camera = new Camera();
-camera.worldRotation = Euler(-20, 0, 0);
+const camera = new PerspectiveCamera();
+const cameraOffset = Vector(0, 900, -1500);
+camera.rotation.x = 20;
 camera.updateRotationMatrix();
 //GameHelper Setup
 enableKeyListeners();
@@ -16,7 +17,7 @@ document.addEventListener('click', () => {
 //Player
 const player = new PhysicsObject(world, new Box(100, 200, 100), new CANNON.Body({ mass: 1, material: new CANNON.Material() }));
 player.aShape.showOutline();
-player.cBody.position.set(200, 300, 0);
+player.cBody.position.set(200, 300, 2000);
 player.cBody.material.friction = 0.2;
 player.cBody.linearDamping = 0.31;
 player.cBody.angularDamping = 1;
@@ -37,10 +38,10 @@ disc.cBody.angularVelocity.set(0, 1, 0);
 const discBodyContactMaterial = new CANNON.ContactMaterial(base.cBody.material, disc.cBody.material, { friction: 0 });
 world.addContactMaterial(discBodyContactMaterial);
 //Platform
-const platform = new PhysicsObject(world, new Box(400, 10, 1000), new CANNON.Body({ mass: 0 }));
-platform.aShape.setColour("ffff00");
+const platform = new PhysicsObject(world, new Box(400, 10, 3000), new CANNON.Body({ mass: 0 }));
+platform.aShape.setColour("#ffff00");
 platform.aShape.showOutline();
-platform.cBody.position.set(0, 0, 1000);
+platform.cBody.position.set(0, 0, 1500);
 //Rotating Hammer
 //Thid Person Camera
 const rotationSensitivity = 0.1;
@@ -49,14 +50,7 @@ document.body.onmousemove = ($e) => {
     const currentRotationQuaternion = { x: player.cBody.quaternion.x, y: player.cBody.quaternion.y, z: player.cBody.quaternion.z, w: player.cBody.quaternion.w };
     const resultQuaternion = multiplyQuaternions(currentRotationQuaternion, yRotationQuaternion);
     player.cBody.quaternion.set(resultQuaternion.x, resultQuaternion.y, resultQuaternion.z, resultQuaternion.w);
-    camera.worldRotation.x -= $e.movementY * rotationSensitivity; //only rotating world and not player
-    if (camera.worldRotation.x < -90) {
-        camera.worldRotation.x = -90;
-    } //limit rotation ourselves, since we disabled rotation in enableMovementControls()
-    else if (camera.worldRotation.x > 0) {
-        camera.worldRotation.x = 0;
-    }
-    camera.worldRotation.y -= $e.movementX * rotationSensitivity;
+    camera.rotation.y += $e.movementX * rotationSensitivity; //cant sync camera's rotation since we don't have access to the player's y rotation, only quaternion
     camera.updateRotationMatrix();
 };
 //ANIMATION LOOP
@@ -94,7 +88,15 @@ setInterval(() => {
     base.syncAShape();
     disc.syncAShape();
     platform.syncAShape();
-    camera.position = player.aShape.position;
+    //Sync Camera behind player, by rotating vector from player -> camera
+    const playerCameraVector = JSON.parse(JSON.stringify(cameraOffset));
+    const inverseQuaternion = JSON.parse(JSON.stringify(player.aShape.quaternion));
+    inverseQuaternion.w *= 1;
+    const cameraPosition = multiplyQuaternionVector(inverseQuaternion, playerCameraVector);
+    cameraPosition.x += player.aShape.position.x;
+    cameraPosition.z += player.aShape.position.z;
+    camera.position = cameraPosition;
+    //Stop disc from falling off surface
     disc.cBody.position.x = 0;
     disc.cBody.position.z = 0;
     clearCanvas();
