@@ -63,26 +63,58 @@ class RotatingDisc extends Obstacle {
 }
 RotatingDisc.height = 25;
 RotatingDisc.defaultColour = "#87deeb";
-class PendulumHammer {
-    //hammer: PhysicsObject;
+class PendulumHammer extends Obstacle {
     constructor(dimensions, position, colour) {
+        super();
+        this.hammerRotationSpeed = PendulumHammer.defaultHammerRotationSpeed;
         this.height = dimensions.height;
         this.gap = dimensions.gap;
         this.position = position;
         const support = constructObjectFromPrimatives([
             new PrimativeBox({ width: PendulumHammer.supportWidth, height: this.height, depth: PendulumHammer.supportDepth }, Vector(-(this.gap / 2) + (PendulumHammer.supportWidth / 2), 0, 0)),
-            new PrimativeBox({ width: PendulumHammer.supportWidth, height: this.height, depth: PendulumHammer.supportDepth }, Vector((this.gap / 2) - (PendulumHammer.supportWidth / 2), 0, 0))
+            new PrimativeBox({ width: PendulumHammer.supportWidth, height: this.height, depth: PendulumHammer.supportDepth }, Vector((this.gap / 2) - (PendulumHammer.supportWidth / 2), 0, 0)),
+            new PrimativeBox({ width: this.gap, height: PendulumHammer.supportBarHeight, depth: PendulumHammer.supportDepth }, Vector(0, this.height / 2, 0))
         ], 0);
-        support.aShape.position = this.position;
+        support.aShape.position = JSON.parse(JSON.stringify(this.position));
+        support.aShape.position.y += this.height / 2;
         this.support = new PhysicsObject(obstacleConfig.world, support.aShape, support.cBody);
+        const hammer = constructObjectFromPrimatives([
+            new PrimativeBox({ width: PendulumHammer.hammerWidth, height: this.height / 2, depth: PendulumHammer.hammerDepth }, Vector(0, -(PendulumHammer.supportBarHeight / 2) - (this.height / 4) + (PendulumHammer.hammerWidth / 2), 0)),
+            new PrimativeCylinder({ radius: PendulumHammer.hammerRadius, height: PendulumHammer.hammerLength }, Vector(0, -(this.height / 2) - (PendulumHammer.hammerRadius / 2), 0), Euler(90, 0, 0))
+        ], 0);
+        hammer.aShape.position = JSON.parse(JSON.stringify(this.position));
+        hammer.aShape.position.y += (this.height) - (PendulumHammer.supportBarHeight * 0.25); //want hammer to look like it is hanging from the support bar
+        this.hammer = new PhysicsObject(obstacleConfig.world, hammer.aShape, hammer.cBody);
         const objectColour = (colour == undefined) ? PendulumHammer.defaultColour : colour;
         this.support.aShape.setColour(objectColour);
         this.support.aShape.showOutline();
+        this.hammer.aShape.setColour(objectColour);
+        this.hammer.aShape.showOutline();
+        this.support.aShape.faces[2].colour = ""; //these faces will be hidden by the top support bar anyway
+        this.support.aShape.faces[8].colour = "";
     }
     update() {
         this.support.syncAShape();
+        this.tickRotation();
+    }
+    tickRotation() {
+        if (this.hammer.aShape.rotation.x >= 90) {
+            this.hammerRotationSpeed *= -1;
+        }
+        if (this.hammer.aShape.rotation.x <= -90) {
+            this.hammerRotationSpeed *= -1;
+        }
+        this.hammer.aShape.rotation.x += this.hammerRotationSpeed;
+        this.hammer.aShape.updateQuaternion();
+        this.hammer.syncCBody();
     }
 }
 PendulumHammer.defaultColour = "#ff00ff";
 PendulumHammer.supportWidth = 50;
+PendulumHammer.supportBarHeight = 50;
 PendulumHammer.supportDepth = 50;
+PendulumHammer.hammerWidth = 50;
+PendulumHammer.hammerDepth = 50;
+PendulumHammer.hammerRadius = 50;
+PendulumHammer.hammerLength = 100;
+PendulumHammer.defaultHammerRotationSpeed = 2;
