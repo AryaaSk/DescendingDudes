@@ -8,7 +8,8 @@ linkCanvas("renderingWindow")
 const camera = new PerspectiveCamera();
 camera.rotation.x = 20;
 camera.updateRotationMatrix();
-camera.nearDistance = 1000;
+camera.clipOffset = 10;;
+const cameraOffset = Vector( 0, 500, -800 );
 
 //GameHelper Setup
 enableKeyListeners();
@@ -28,11 +29,15 @@ player.physicsObject.cBody.position.set(0, 500, 0);
 
 
 //Obstacles, ordered in order of appearance in the Level
-const rotatingDisc1 = new RotatingDisc( world, { radius: 400 }, Vector(0, 0, 0));
+obstacleConfig.world = world;
 
-const platform = new Platform( world, { width: 300, depth: 3000 }, Vector( 0, 0, 1500 ) );
+const rotatingDisc1 = new RotatingDisc( { radius: 400 }, Vector(0, 0, 0));
 
-const rotatingDisc2 = new RotatingDisc( world, { radius: 400 }, Vector(0, 0, 3000));
+const platform1 = new Platform( { width: 300, depth: 3000 }, Vector( 0, 0, 1500 ) );
+
+const pendulumHammer1 = new PendulumHammer( { height: 400, gap: 300 }, Vector( 0, 200, 1500 ) );
+
+const rotatingDisc2 = new RotatingDisc( { radius: 300 }, Vector(0, 0, 3000), "#ff8000");
 
 
 
@@ -55,28 +60,29 @@ setInterval(() => {
     player.moveLocal( pMovement );
 
 
+    //Update world
     world.step(16 / 1000);
 
     //Sync aryaa3D Shapes
-    player.physicsObject.syncAShape();
-    player.syncCameraPosition( camera, Vector( 0, 600, -1200 ) );
-
+    player.update( camera, cameraOffset );
     rotatingDisc1.update();
-    platform.update();
+    platform1.update();
+    pendulumHammer1.update();
     rotatingDisc2.update();
 
-    //different y-values, since we limited rotation, the items will always be on top / parallel to each other
+    //multiple render function calls for different y-values, since we limited rotation, the items will always be on top / parallel to each other
     clearCanvas();
     camera.render([ //Bottom Layer (platforms)
         rotatingDisc1.base.aShape, 
-        platform.physicalObject.aShape,
+        platform1.physicalObject.aShape,
         rotatingDisc2.base.aShape
     ]);
-    camera.render([ //Middle layer, for obstacles
+    camera.render([ //Middle layer, for obstacles such as moving platforms
         rotatingDisc1.disc.aShape,
-        rotatingDisc2.disc.aShape
+        rotatingDisc2.disc.aShape,
     ]);
-    camera.render([ //Top layer, for rendering player
-        player.physicsObject.aShape
+    camera.render([ //Top layer, for rendering player and player height obstacles
+        player.physicsObject.aShape,
+        pendulumHammer1.support.aShape
     ]);
 }, 16);

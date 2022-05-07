@@ -35,6 +35,10 @@ class Player {
             }
         });
     }
+    update(camera, cameraOffset) {
+        player.physicsObject.syncAShape();
+        player.syncCameraPosition(camera, cameraOffset);
+    }
     thirdPersonCamera(camera) {
         document.body.addEventListener('mousemove', ($e) => {
             const yRotationQuaternion = eulerToQuaternion(Euler(0, $e.movementX * this.rotationSensitivity, 0));

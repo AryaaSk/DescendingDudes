@@ -6,6 +6,17 @@ class Player {
     jumpForce: number = 500;
     rotationSensitivity = 0.1;
 
+    constructor ( world: CANNON.World, camera: PerspectiveCamera ) {
+        this.physicsObject = new PhysicsObject( world, new Box(100, 200, 100), new CANNON.Body( { mass: 1, material: new CANNON.Material() } ) )
+        this.physicsObject.aShape.showOutline();
+        this.physicsObject.cBody.material.friction = 0.2;
+        this.physicsObject.cBody.linearDamping = 0.31;
+        this.physicsObject.cBody.angularDamping = 1;
+
+        this.collisionListener();
+        this.thirdPersonCamera( camera );
+    }
+
     //Methods
     moveLocal( vector: XYZ ) {
         //need to multiply this vector by the player's rotation
@@ -21,7 +32,6 @@ class Player {
             this.inAir = true;
         }
     }
-
     private collisionListener() {
         //check if the player is currently colliding with a surface, and not in a jump
         this.physicsObject.cBody.addEventListener( 'collide', ($e: CANNON.ICollisionEvent) => {
@@ -31,6 +41,10 @@ class Player {
         })
     }
 
+    update( camera: PerspectiveCamera, cameraOffset: XYZ ) {
+        player.physicsObject.syncAShape();
+        player.syncCameraPosition( camera, cameraOffset );
+    }
     thirdPersonCamera( camera: PerspectiveCamera ) { //Thid Person Camera
         document.body.addEventListener('mousemove', ($e) => {
             const yRotationQuaternion = eulerToQuaternion( Euler( 0, $e.movementX * this.rotationSensitivity, 0 ) );
@@ -50,16 +64,5 @@ class Player {
         cameraPosition.x += this.physicsObject.cBody.position.x;
         cameraPosition.z += this.physicsObject.cBody.position.z;
         camera.position =  cameraPosition;
-    }
-
-    constructor ( world: CANNON.World, camera: PerspectiveCamera ) {
-        this.physicsObject = new PhysicsObject( world, new Box(100, 200, 100), new CANNON.Body( { mass: 1, material: new CANNON.Material() } ) )
-        this.physicsObject.aShape.showOutline();
-        this.physicsObject.cBody.material.friction = 0.2;
-        this.physicsObject.cBody.linearDamping = 0.31;
-        this.physicsObject.cBody.angularDamping = 1;
-
-        this.collisionListener();
-        this.thirdPersonCamera( camera );
     }
 }
