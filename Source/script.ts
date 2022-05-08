@@ -1,5 +1,5 @@
 //CANNON Setup
-let world = new CANNON.World();
+let world: CANNON.World;
 
 //Aryaa3D Setup
 linkCanvas("renderingWindow")
@@ -18,7 +18,7 @@ document.addEventListener('click', () => { //full screen mode
 
 
 //Config Setups
-let player = new Player( world, camera );
+let player: Player;
 LevelConfig.camera = camera; //camera never gets reset so we leave it outside the resetConfigs()
 
 const resetConfigs = () => {
@@ -26,93 +26,33 @@ const resetConfigs = () => {
     world.gravity.set( 0, -9.82 * 100, 0 );
 
     player = new Player( world, camera ); //supplying the new objects to the config variables
-    obstacleConfig.world = world;
+    ObstacleConfig.world = world;
     LevelConfig.player = player;
 }
 
 
 //Levels
 let currentLevel: Level;
+
 const loadLevel = ( levelIndex: number ) => {
     //need to remove all bodies, so that the levels don't stack on top of each other
     resetConfigs();
+    
+    switch (levelIndex){
+        case 0:
+            currentLevel = DemoLevel();
+            break;
+        case 1:
+            currentLevel = DemoLevel2();
+            break;
 
-    if ( levelIndex == 0 ) { //Test Level, to test the obstacles
-        currentLevel = new Level()
-
-        const rotatingDisc1 = new RotatingDisc( { radius: 400 }, Vector(0, 0, 0));
-        const platform1 = new Platform( { width: 1000, depth: 3000 }, Vector( 0, 0, 1500 ) );
-        const pendulumHammer1 = new PendulumHammer( { height: 300, gap: 400, hammerReach: 175, hammerSize: 100 }, Vector( -300, 0, 1500 ) );
-        const jumpBar1 = new JumpBar( { length: 800 }, Vector(0, 50, 0), { rotationSpeed: -1 });
-        const jumpBar2 = new JumpBar( { length: 600 }, Vector(300, 5, 1500), { rotationSpeed: 1, colour: "#ff0000" });
-        const rotatingDisc2 = new RotatingDisc( { radius: 300 }, Vector(0, 0, 3000), { colour: "#ff8000", rotationSpeed: -1 });
-        currentLevel.obstacles =  [
-            rotatingDisc1, 
-            platform1, 
-            pendulumHammer1, 
-            jumpBar1, 
-            jumpBar2, 
-            rotatingDisc2
-        ];
-
-        currentLevel.layers =  {   
-            bottom: [rotatingDisc1.base.aShape,  
-                    platform1.physicalObject.aShape, 
-                    rotatingDisc2.base.aShape], 
-        
-            middle: [rotatingDisc1.disc.aShape,
-                    jumpBar1.base.aShape,
-                    jumpBar2.base.aShape,
-                    rotatingDisc2.disc.aShape],
-        
-            top:    [pendulumHammer1.support.aShape, pendulumHammer1.hammer.aShape,
-                    jumpBar1.bar.aShape,
-                    jumpBar2.bar.aShape]
-        };
-    }
-
-
-
-    else if ( levelIndex == 1 ) { //Just another test level, to test level loading
-        currentLevel= new Level()
-
-        const rotatingDisc1 = new RotatingDisc( { radius: 400 }, Vector(0, 0, 0));
-        const platform1 = new Platform( { width: 1000, depth: 3000 }, Vector( 0, 0, 1500 ) );
-        const pendulumHammer1 = new PendulumHammer( { height: 500, gap: 400, hammerReach: 400, hammerSize: 100 }, Vector( -300, 0, 1500 ) );
-        const jumpBar1 = new JumpBar( { length: 800 }, Vector(0, 50, 0), { rotationSpeed: -1 });
-        const jumpBar2 = new JumpBar( { length: 600 }, Vector(300, 5, 1500), { rotationSpeed: 1, colour: "#ff0000" });
-        const rotatingDisc2 = new RotatingDisc( { radius: 100 }, Vector(0, 0, 3000), { colour: "#ff0000", rotationSpeed: 10 });
-        currentLevel.obstacles =  [
-            rotatingDisc1, 
-            platform1, 
-            pendulumHammer1, 
-            jumpBar1, 
-            jumpBar2, 
-            rotatingDisc2
-        ];
-
-        currentLevel.layers =  {   
-            bottom: [rotatingDisc1.base.aShape,  
-                    platform1.physicalObject.aShape, 
-                    rotatingDisc2.base.aShape], 
-        
-            middle: [rotatingDisc1.disc.aShape,
-                    jumpBar1.base.aShape,
-                    jumpBar2.base.aShape,
-                    rotatingDisc2.disc.aShape],
-        
-            top:    [pendulumHammer1.support.aShape, pendulumHammer1.hammer.aShape,
-                    jumpBar1.bar.aShape,
-                    jumpBar2.bar.aShape]
-        };
+        default:
+            console.error("Invalid level index");
     }
 
     currentLevel.spawnPlayer( Vector(0, 500, 0) );
 }
     
-
-
-
 //Game flow, just load each level using loadLevel( levelIndex );
 loadLevel( 0 );
 
