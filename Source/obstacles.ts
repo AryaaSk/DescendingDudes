@@ -1,15 +1,9 @@
-const ObstacleConfig: {
-    world?: CANNON.World
-} = {
-    world: undefined
-};
-
 class Obstacle { //When specifying obstacle's position, user should not need to take obstacle's height into consideration, it should translate y by +(height / 2) automatically.
     position: XYZ = Vector(0, 0, 0);
 
     constructor() {
-        if (ObstacleConfig.world == undefined) {
-            console.error("Cannot add obstacle, please pass a CANNON World to the ObstacleConfig");
+        if (GameConfig.world == undefined) {
+            console.error("Cannot add obstacle, please pass a CANNON World to the GameConfig");
             return;
         }
     }
@@ -34,7 +28,7 @@ class Platform extends Obstacle {
 
         const thickness = (dimensions.thickness == undefined) ? Platform.thickness : dimensions.thickness;
         const aShape = new Box( this.width, thickness, this.depth );
-        this.physicalObject = new PhysicsObject( ObstacleConfig.world!, aShape, new CANNON.Body( { mass: 0 } ) );
+        this.physicalObject = new PhysicsObject( GameConfig.world!, aShape, new CANNON.Body( { mass: 0 } ) );
         this.physicalObject.cBody.position.set( this.position.x, this.position.y, this.position.z );
         this.physicalObject.cBody.id = -1; //so that player can recognise and reset jump
 
@@ -71,15 +65,15 @@ class RotatingDisc extends Obstacle {
         discAShape.position = JSON.parse(JSON.stringify(this.position));
         discAShape.position.y += RotatingDisc.height; //to make the disc fall onto the base
 
-        this.base = new PhysicsObject( ObstacleConfig.world!, baseAShape, new CANNON.Body( { mass: 0, material: new CANNON.Material() } )); //not actually a cylinder, just looks like it
-        this.disc = new PhysicsObject( ObstacleConfig.world!, discAShape, new CANNON.Body( { mass: 10000, material: new CANNON.Material( { friction: 1 } ), shape: new CANNON.Cylinder(this.radius, this.radius, RotatingDisc.height, 8) } ) );
+        this.base = new PhysicsObject( GameConfig.world!, baseAShape, new CANNON.Body( { mass: 0, material: new CANNON.Material() } )); //not actually a cylinder, just looks like it
+        this.disc = new PhysicsObject( GameConfig.world!, discAShape, new CANNON.Body( { mass: 10000, material: new CANNON.Material( { friction: 1 } ), shape: new CANNON.Cylinder(this.radius, this.radius, RotatingDisc.height, 8) } ) );
 
         const rotationSpeed = ( options?.rotationSpeed == undefined ) ? RotatingDisc.defaultRotationSpeed : options?.rotationSpeed;
         this.disc.cBody.angularVelocity.set( 0, rotationSpeed, 0 );
         this.disc.cBody.id = -1; //user shouldn't be interacting with base so don't need to set it
 
         const discBodyContactMaterial = new CANNON.ContactMaterial( this.base.cBody.material, this.disc.cBody.material, { friction: 0 } );
-        world.addContactMaterial(discBodyContactMaterial); 
+        GameConfig.world!.addContactMaterial(discBodyContactMaterial); 
 
         const objectColour = ( options?.colour == undefined ) ? RotatingDisc.defaultColour : options?.colour;
         this.base.aShape.setColour(objectColour);
@@ -125,7 +119,7 @@ class PendulumHammer extends Obstacle {
         ], 0)
         support.aShape.position = JSON.parse(JSON.stringify(this.position));
         support.aShape.position.y += this.height / 2;
-        this.support = new PhysicsObject( ObstacleConfig.world!, support.aShape, support.cBody );
+        this.support = new PhysicsObject( GameConfig.world!, support.aShape, support.cBody );
 
         const hammerSize = (dimensions.hammerSize == undefined) ? PendulumHammer.defaultHammerSize : dimensions.hammerSize;
         const hammer = constructObjectFromPrimatives( [
@@ -134,7 +128,7 @@ class PendulumHammer extends Obstacle {
         ], 0);
         hammer.aShape.position = JSON.parse(JSON.stringify(this.position));
         hammer.aShape.position.y += (this.height) + (PendulumHammer.supportBarHeight / 2); //want hammer to look like it is hanging from the support bar
-        this.hammer = new PhysicsObject( ObstacleConfig.world!, hammer.aShape, hammer.cBody );
+        this.hammer = new PhysicsObject( GameConfig.world!, hammer.aShape, hammer.cBody );
         
         this.support.cBody.material = new CANNON.Material( { friction: 0 } );
         this.hammer.cBody.material = new CANNON.Material( { friction: 0 } );
@@ -192,8 +186,8 @@ class JumpBar extends Obstacle {
         bar.aShape.position.y += JumpBar.baseHeight + (JumpBar.barThickness / 2);
         bar.cBody.material = new CANNON.Material( { friction: 0 } );
 
-        this.base = new PhysicsObject( ObstacleConfig.world!, baseAShape, new CANNON.Body({ mass: 0, material: new CANNON.Material( { friction: 1 } )}) );
-        this.bar = new PhysicsObject( ObstacleConfig.world!, bar.aShape, bar.cBody );
+        this.base = new PhysicsObject( GameConfig.world!, baseAShape, new CANNON.Body({ mass: 0, material: new CANNON.Material( { friction: 1 } )}) );
+        this.bar = new PhysicsObject( GameConfig.world!, bar.aShape, bar.cBody );
 
         const rotationSpeed = (options?.rotationSpeed == undefined) ? JumpBar.defaultRotationSpeed : options?.rotationSpeed;
         bar.cBody.angularVelocity.set( 0, rotationSpeed, 0 );

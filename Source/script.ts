@@ -1,14 +1,3 @@
-//CANNON Setup
-let world: CANNON.World;
-
-//Aryaa3D Setup
-linkCanvas("renderingWindow")
-const camera = new PerspectiveCamera();
-camera.rotation.x = 20;
-camera.updateRotationMatrix();
-camera.clipOffset = 10;;
-const cameraOffset = Vector( 0, 500, -800 );
-
 //GameHelper Setup
 enableKeyListeners();
 
@@ -16,22 +5,30 @@ document.addEventListener('click', () => { //full screen mode
     document.body.requestPointerLock();
 }, { once: false })
 
+//Aryaa3D Setup
+linkCanvas("renderingWindow")
 
 //Config Setups
-let player: Player;
-LevelConfig.camera = camera; //camera never gets reset so we leave it outside the resetConfigs()
+let GameConfig: {
+    player?: Player,
+    world?: CANNON.World,
+    camera?: PerspectiveCamera,
+} = { player: undefined, world: undefined, camera: undefined }
+
+GameConfig.camera = new PerspectiveCamera();; //camera never gets reset so we leave it outside the resetConfigs()
+GameConfig.camera.rotation.x = 20;
+GameConfig.camera.updateRotationMatrix();
+GameConfig.camera.clipOffset = 10;;
+const cameraOffset = Vector( 0, 500, -800 );
 
 const resetConfigs = () => {
-    world = new CANNON.World(); //need to remove all bodies, so that the levels don't stack on top of each other
-    world.gravity.set( 0, -9.82 * 100, 0 );
-
-    player = new Player( world, camera ); //supplying the new objects to the config variables
-    ObstacleConfig.world = world;
-    LevelConfig.player = player;
+    GameConfig.world = new CANNON.World(); //Need to remove all bodies, so that the levels don't stack on top of each other
+    GameConfig.world.gravity.set( 0, -9.82 * 100, 0 );
+    GameConfig.player = new Player( GameConfig.world, GameConfig.camera! ); //Creating a new Player object with the newly created CANNON World
 }
 
-
 //Levels
+let currentLevelIndex: number;
 let currentLevel: Level;
 
 const loadLevel = ( levelIndex: number ) => {
@@ -41,8 +38,9 @@ const loadLevel = ( levelIndex: number ) => {
     }
 
     resetConfigs();
+    currentLevelIndex = levelIndex;
     currentLevel = levels[levelIndex]();
-    currentLevel.spawnPlayer( Vector(0, 500, 0) );
+    currentLevel.spawnPlayer( currentLevel.spawnPoint );
 }
     
 //Game flow, just load each level using loadLevel( levelIndex );
@@ -51,38 +49,51 @@ loadLevel( 0 );
 
 
 //ANIMATION LOOP
-setInterval(() => {
+const gameLoop = setInterval(() => {
 
     //Handle keysdown
     const pMovement = Vector(0, 0, 0);
     keysDown.forEach((key) => {
-        if (key == "w") {  pMovement.z += player.speed; }
-        else if (key == "s") { pMovement.z -= player.speed; }
-        else if (key == "a") { pMovement.x -= player.speed; }
-        else if (key == "d") { pMovement.x += player.speed; }
+        if (key == "w") {  pMovement.z += GameConfig.player!.speed; }
+        else if (key == "s") { pMovement.z -= GameConfig.player!.speed; }
+        else if (key == "a") { pMovement.x -= GameConfig.player!.speed; }
+        else if (key == "d") { pMovement.x += GameConfig.player!.speed; }
 
         else if (key == " ") { 
-            player.jump( player.jumpForce ); //validation happens inside player class
+            GameConfig.player!.jump( GameConfig.player!.jumpForce ); //validation happens inside player class
         }
     })
-    player.moveLocal( pMovement );
+    GameConfig.player!.moveLocal( pMovement );
 
     //Update world / level
     currentLevel.updateCallback();
-    world.step(16 / 1000);
+    GameConfig.world!.step(16 / 1000);
 
     //Sync aryaa3D Shapes
-    player.update( camera, cameraOffset );
+    GameConfig.player!.update( GameConfig.camera!, cameraOffset );
     currentLevel.updateAShapes();
 
     //Render level
     clearCanvas();
     currentLevel.renderLevel();
 
-    //check if player's y coordinate is < -400, if so then the player has fallen off the map and gets respawned
-    if (player.physicsObject.cBody.position.y <= -400) {
+    //Check if player's y coordinate is < -400, if so then the player has fallen off the map and gets respawned
+    if (GameConfig.player!.physicsObject.cBody.position.y <= -400) {
         console.warn("Player died (y <= -400), respawning now...");
-        currentLevel.spawnPlayer( Vector(0, 500, 0) );
+        currentLevel.spawnPlayer( currentLevel.respawnPoint );
+    }
+
+    //Check if player's z coordinate is >= current level's finishZ, if so then the player has finished the level and load next level
+    if (GameConfig.player!.physicsObject.cBody.position.z >= currentLevel.finishZ) {
+        console.log(`Player has completed level ${String(currentLevelIndex)}`);
+
+        if (currentLevelIndex == (levels.length - 1)) {
+            console.log("Congradulations, you have finished all the levels");
+            clearInterval(gameLoop);
+        }
+        else {
+            loadLevel( currentLevelIndex + 1 );
+        }
     }
 
 }, 16);

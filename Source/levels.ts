@@ -1,30 +1,26 @@
-const LevelConfig: {
-    player?: Player
-    camera?: PerspectiveCamera
-} = {
-    player: undefined,
-    camera: undefined,
-};
-
 class Level { //Levels work by taking in all the references to the obstacles and also their aShapes, it is very important that they are references
     obstacles: Obstacle[] = [];
     layers: { bottom: Shape[], middle: Shape[], top: Shape[] } = { bottom: [], middle: [], top: [] };
     updateCallback: (() => void) = () => {}; //DO NOT USE THIS FOR UPDATING ARYAA3D SHAPES, if the level wants to perform an action which is not performed by individual obstacles, e.g. a moving platform. 
 
     constructor() {
-        if (LevelConfig.player == undefined) {
-            console.trace("Please specifify a player object in the LevelConfig");
+        if (GameConfig.player == undefined) {
+            console.trace("Please specifify a player object in the GameConfig");
             return;
         }
-        if (LevelConfig.camera == undefined) {
-            console.error("Please specifify a camera object in the LevelConfig");
+        if (GameConfig.camera == undefined) {
+            console.error("Please specifify a camera object in the GameConfig");
             return;
         }
     }
 
+    spawnPoint: XYZ = Vector(0, 500, 0);
+    respawnPoint: XYZ = Vector(0, 500, 0);
     spawnPlayer( playerPosition: XYZ ) {
-        LevelConfig.player!.physicsObject.cBody.position.set( playerPosition.x, playerPosition.y, playerPosition.z );
+        GameConfig.player!.physicsObject.cBody.position.set( playerPosition.x, playerPosition.y, playerPosition.z );
     }
+
+    finishZ: number = 3000; //Z coordinate of which the player has to pass to finish, 3000 by default just so that the level is not automatically completed
     
     updateAShapes() {
         for (const obstacle of this.obstacles) {
@@ -33,9 +29,9 @@ class Level { //Levels work by taking in all the references to the obstacles and
     }
 
     renderLevel() { //multiple render function calls for different y-values, since we limited rotation, the items will always be on top / parallel to each other
-        LevelConfig.camera?.render(this.layers.bottom); //Bottom Layer (platforms)
-        LevelConfig.camera?.render(this.layers.middle); //Middle layer, for obstacles such as moving platforms and bases
-        LevelConfig.camera?.render(this.layers.top.concat([LevelConfig.player!.physicsObject.aShape])); //Top layer, for rendering player and player height obstacles
+        GameConfig.camera!.render(this.layers.bottom); //Bottom Layer (platforms)
+        GameConfig.camera!.render(this.layers.middle); //Middle layer, for obstacles such as moving platforms and bases
+        GameConfig.camera!.render(this.layers.top.concat([GameConfig.player!.physicsObject.aShape])); //Top layer, for rendering player and player height obstacles
     }
 }
 
@@ -45,7 +41,8 @@ class Level { //Levels work by taking in all the references to the obstacles and
 
 //Actual Levels
 const levels: (() => Level)[] = []; //an array of functions, which will return a level when called
-const DemoLevel = () => {
+
+levels.push(() => { //Demo level, to test obstacles
     const level = new Level()
 
     const rotatingDisc1 = new RotatingDisc( { radius: 400 }, Vector(0, 0, 0));
@@ -56,6 +53,8 @@ const DemoLevel = () => {
     const movingPlatform1 = new Platform( { width: 400, depth: 200, thickness: 30 }, Vector( 600, 100, 2000 ), { colour: "#0000ff" });
     const movingPlatform2 = new Platform( { width: 400, depth: 200, thickness: 30 }, Vector( -600, 100, 2000 ), { colour: "#0000ff" });
     const rotatingDisc2 = new RotatingDisc( { radius: 300 }, Vector(0, 0, 3000), { colour: "#ff8000", rotationSpeed: -1 });
+
+    level.spawnPoint = Vector( 0, 500, 0 );
 
     level.obstacles =  [
         rotatingDisc1, 
@@ -98,13 +97,12 @@ const DemoLevel = () => {
     }
 
     return level;
-}
-levels.push(DemoLevel)
+})
 
 
 
 
-const DemoLevel2 = () => {//creating level in new scope so that the obstacle names don't interfere with each other
+levels.push(() => { //testing multiple levels
     const level = new Level()
 
     const rotatingDisc1 = new RotatingDisc( { radius: 400 }, Vector(0, 0, 0));
@@ -139,5 +137,4 @@ const DemoLevel2 = () => {//creating level in new scope so that the obstacle nam
     };
 
     return level;
-}
-levels.push(DemoLevel2)
+})

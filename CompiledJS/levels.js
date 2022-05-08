@@ -1,24 +1,23 @@
 "use strict";
-const LevelConfig = {
-    player: undefined,
-    camera: undefined,
-};
 class Level {
     constructor() {
         this.obstacles = [];
         this.layers = { bottom: [], middle: [], top: [] };
         this.updateCallback = () => { }; //DO NOT USE THIS FOR UPDATING ARYAA3D SHAPES, if the level wants to perform an action which is not performed by individual obstacles, e.g. a moving platform. 
-        if (LevelConfig.player == undefined) {
-            console.trace("Please specifify a player object in the LevelConfig");
+        this.spawnPoint = Vector(0, 500, 0);
+        this.respawnPoint = Vector(0, 500, 0);
+        this.finishZ = 3000; //Z coordinate of which the player has to pass to finish, 3000 by default just so that the level is not automatically completed
+        if (GameConfig.player == undefined) {
+            console.trace("Please specifify a player object in the GameConfig");
             return;
         }
-        if (LevelConfig.camera == undefined) {
-            console.error("Please specifify a camera object in the LevelConfig");
+        if (GameConfig.camera == undefined) {
+            console.error("Please specifify a camera object in the GameConfig");
             return;
         }
     }
     spawnPlayer(playerPosition) {
-        LevelConfig.player.physicsObject.cBody.position.set(playerPosition.x, playerPosition.y, playerPosition.z);
+        GameConfig.player.physicsObject.cBody.position.set(playerPosition.x, playerPosition.y, playerPosition.z);
     }
     updateAShapes() {
         for (const obstacle of this.obstacles) {
@@ -26,15 +25,14 @@ class Level {
         }
     }
     renderLevel() {
-        var _a, _b, _c;
-        (_a = LevelConfig.camera) === null || _a === void 0 ? void 0 : _a.render(this.layers.bottom); //Bottom Layer (platforms)
-        (_b = LevelConfig.camera) === null || _b === void 0 ? void 0 : _b.render(this.layers.middle); //Middle layer, for obstacles such as moving platforms and bases
-        (_c = LevelConfig.camera) === null || _c === void 0 ? void 0 : _c.render(this.layers.top.concat([LevelConfig.player.physicsObject.aShape])); //Top layer, for rendering player and player height obstacles
+        GameConfig.camera.render(this.layers.bottom); //Bottom Layer (platforms)
+        GameConfig.camera.render(this.layers.middle); //Middle layer, for obstacles such as moving platforms and bases
+        GameConfig.camera.render(this.layers.top.concat([GameConfig.player.physicsObject.aShape])); //Top layer, for rendering player and player height obstacles
     }
 }
 //Actual Levels
 const levels = []; //an array of functions, which will return a level when called
-const DemoLevel = () => {
+levels.push(() => {
     const level = new Level();
     const rotatingDisc1 = new RotatingDisc({ radius: 400 }, Vector(0, 0, 0));
     const platform1 = new Platform({ width: 1000, depth: 3000 }, Vector(0, 0, 1500));
@@ -44,6 +42,7 @@ const DemoLevel = () => {
     const movingPlatform1 = new Platform({ width: 400, depth: 200, thickness: 30 }, Vector(600, 100, 2000), { colour: "#0000ff" });
     const movingPlatform2 = new Platform({ width: 400, depth: 200, thickness: 30 }, Vector(-600, 100, 2000), { colour: "#0000ff" });
     const rotatingDisc2 = new RotatingDisc({ radius: 300 }, Vector(0, 0, 3000), { colour: "#ff8000", rotationSpeed: -1 });
+    level.spawnPoint = Vector(0, 500, 0);
     level.obstacles = [
         rotatingDisc1,
         platform1,
@@ -87,9 +86,8 @@ const DemoLevel = () => {
         movingPlatform2.physicalObject.cBody.position.x += movingPlatform2Direction;
     };
     return level;
-};
-levels.push(DemoLevel);
-const DemoLevel2 = () => {
+});
+levels.push(() => {
     const level = new Level();
     const rotatingDisc1 = new RotatingDisc({ radius: 400 }, Vector(0, 0, 0));
     const platform1 = new Platform({ width: 1000, depth: 3000 }, Vector(0, 0, 1500));
@@ -118,5 +116,4 @@ const DemoLevel2 = () => {
             jumpBar2.bar.aShape]
     };
     return level;
-};
-levels.push(DemoLevel2);
+});

@@ -43,15 +43,15 @@ class Player {
     }
 
     update( camera: PerspectiveCamera, cameraOffset: XYZ ) {
-        player.physicsObject.syncAShape();
-        player.syncCameraPosition( camera, cameraOffset );
+        GameConfig.player!.physicsObject.syncAShape();
+        GameConfig.player!.syncCameraPosition( camera, cameraOffset );
     }
     thirdPersonCamera( camera: PerspectiveCamera ) { //Thid Person Camera
         document.body.addEventListener('mousemove', ($e) => {
             const yRotationQuaternion = eulerToQuaternion( Euler( 0, $e.movementX * this.rotationSensitivity, 0 ) );
-            const currentRotationQuaternion = { x: player.physicsObject.cBody.quaternion.x, y: player.physicsObject.cBody.quaternion.y, z: player.physicsObject.cBody.quaternion.z, w: player.physicsObject.cBody.quaternion.w };
+            const currentRotationQuaternion = { x: GameConfig.player!.physicsObject.cBody.quaternion.x, y: GameConfig.player!.physicsObject.cBody.quaternion.y, z: GameConfig.player!.physicsObject.cBody.quaternion.z, w: GameConfig.player!.physicsObject.cBody.quaternion.w };
             const resultQuaternion = multiplyQuaternions( currentRotationQuaternion, yRotationQuaternion );
-            player.physicsObject.cBody.quaternion.set( resultQuaternion.x, resultQuaternion.y, resultQuaternion.z, resultQuaternion.w );
+            GameConfig.player!.physicsObject.cBody.quaternion.set( resultQuaternion.x, resultQuaternion.y, resultQuaternion.z, resultQuaternion.w );
         
             camera.rotation.y += $e.movementX * this.rotationSensitivity; //cant sync camera's rotation since we don't have access to the player's y rotation, only quaternion
             camera.updateRotationMatrix();
