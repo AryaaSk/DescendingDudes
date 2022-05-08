@@ -8,7 +8,7 @@ class Level {
         this.obstacles = [];
         this.layers = { bottom: [], middle: [], top: [] };
         if (LevelConfig.player == undefined) {
-            console.error("Please specifify a player object in the LevelConfig");
+            console.trace("Please specifify a player object in the LevelConfig");
             return;
         }
         if (LevelConfig.camera == undefined) {

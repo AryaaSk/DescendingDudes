@@ -7,6 +7,7 @@ class Player {
         this.rotationSensitivity = 0.1;
         this.inAir = false;
         this.physicsObject = new PhysicsObject(world, new Box(100, 200, 100), new CANNON.Body({ mass: 1, material: new CANNON.Material() }));
+        this.physicsObject.aShape.setColour("#ffffff80");
         this.physicsObject.aShape.showOutline();
         this.physicsObject.cBody.material.friction = 0.2;
         this.physicsObject.cBody.linearDamping = 0.31;

@@ -12,7 +12,7 @@ class Level { //Levels work by taking in all the references to the obstacles and
 
     constructor() {
         if (LevelConfig.player == undefined) {
-            console.error("Please specifify a player object in the LevelConfig");
+            console.trace("Please specifify a player object in the LevelConfig");
             return;
         }
         if (LevelConfig.camera == undefined) {

@@ -1,8 +1,6 @@
 "use strict";
-//Setup
-//CannonJS Setup
+//CANNON Setup
 let world = new CANNON.World();
-world.gravity.set(0, -9.82 * 100, 0);
 //Aryaa3D Setup
 linkCanvas("renderingWindow");
 const camera = new PerspectiveCamera();
@@ -16,19 +14,22 @@ enableKeyListeners();
 document.addEventListener('click', () => {
     document.body.requestPointerLock();
 }, { once: false });
-//Player setup
-const player = new Player(world, camera);
-player.physicsObject.aShape.setColour("#ffffff80");
-//Obstacles setup
-obstacleConfig.world = world;
-//Levels setup
-LevelConfig.player = player;
-LevelConfig.camera = camera;
-let currentLevel = new Level();
-//CREATING LEVELS
+//Config Setups
+let player = new Player(world, camera);
+LevelConfig.camera = camera; //camera never gets reset so we leave it outside the resetConfigs()
+const resetConfigs = () => {
+    world = new CANNON.World();
+    world.gravity.set(0, -9.82 * 100, 0);
+    player = new Player(world, camera); //supplying the new objects to the config variables
+    obstacleConfig.world = world;
+    LevelConfig.player = player;
+};
+//Levels
+let currentLevel;
 const loadLevel = (levelIndex) => {
     //need to remove all bodies, so that the levels don't stack on top of each other
-    if (levelIndex == 0) {
+    resetConfigs();
+    if (levelIndex == 0) { //Test Level, to test the obstacles
         currentLevel = new Level();
         const rotatingDisc1 = new RotatingDisc({ radius: 400 }, Vector(0, 0, 0));
         const platform1 = new Platform({ width: 1000, depth: 3000 }, Vector(0, 0, 1500));
@@ -57,7 +58,7 @@ const loadLevel = (levelIndex) => {
                 jumpBar2.bar.aShape]
         };
     }
-    else if (levelIndex == 1) { //Just another test level, to test variation
+    else if (levelIndex == 1) { //Just another test level, to test level loading
         currentLevel = new Level();
         const rotatingDisc1 = new RotatingDisc({ radius: 400 }, Vector(0, 0, 0));
         const platform1 = new Platform({ width: 1000, depth: 3000 }, Vector(0, 0, 1500));
@@ -88,9 +89,8 @@ const loadLevel = (levelIndex) => {
     }
     currentLevel.spawnPlayer(Vector(0, 500, 0));
 };
-//Game flow
-loadLevel(0); //works if you only load 1 level, but I need to figure out how to reset the CANNON.World before loading a new level
-//The problem may be because the PlayerConfig and ObstacleConfig are still using the old CANNON.World, so I'll need to set those as well
+//Game flow, just load each level using loadLevel( levelIndex );
+loadLevel(0);
 //ANIMATION LOOP
 setInterval(() => {
     //Handle keysdown
