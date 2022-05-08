@@ -22,9 +22,11 @@ player.physicsObject.cBody.position.set(0, 500, 0);
 //Obstacles, ordered in order of appearance in the Level
 obstacleConfig.world = world;
 const rotatingDisc1 = new RotatingDisc({ radius: 400 }, Vector(0, 0, 0));
-const platform1 = new Platform({ width: 300, depth: 3000 }, Vector(0, 0, 1500));
-const pendulumHammer1 = new PendulumHammer({ height: 300, gap: 300 }, Vector(0, 0, 1500));
-const rotatingDisc2 = new RotatingDisc({ radius: 300 }, Vector(0, 0, 3000), "#ff8000");
+const platform1 = new Platform({ width: 1000, depth: 3000 }, Vector(0, 0, 1500));
+const pendulumHammer1 = new PendulumHammer({ height: 300, gap: 400, hammerReach: 100, hammerSize: 100 }, Vector(-300, 0, 1500));
+const jumpBar1 = new JumpBar({ length: 800 }, Vector(0, 50, 0), { rotationSpeed: -1 });
+const jumpBar2 = new JumpBar({ length: 600 }, Vector(300, 100, 1500), { rotationSpeed: 1, colour: "#ff0000" });
+const rotatingDisc2 = new RotatingDisc({ radius: 300 }, Vector(0, 0, 3000), { colour: "#ff8000", rotationSpeed: -1 });
 //ANIMATION LOOP
 setInterval(() => {
     //Handle keysdown
@@ -54,6 +56,8 @@ setInterval(() => {
     rotatingDisc1.update();
     platform1.update();
     pendulumHammer1.update();
+    jumpBar1.update();
+    jumpBar2.update();
     rotatingDisc2.update();
     //multiple render function calls for different y-values, since we limited rotation, the items will always be on top / parallel to each other
     clearCanvas();
@@ -68,8 +72,9 @@ setInterval(() => {
     ]);
     camera.render([
         player.physicsObject.aShape,
-        pendulumHammer1.support.aShape,
-        pendulumHammer1.hammer.aShape
+        pendulumHammer1.support.aShape, pendulumHammer1.hammer.aShape,
+        jumpBar1.base.aShape, jumpBar1.bar.aShape,
+        jumpBar2.base.aShape, jumpBar2.bar.aShape
     ]);
     //check if player's y coordinate is < -400, if so then the player has fallen off the map
     if (player.physicsObject.cBody.position.y <= -400) {
