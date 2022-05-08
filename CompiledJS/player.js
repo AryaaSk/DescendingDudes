@@ -61,6 +61,8 @@ class Player {
             let previousX = 0;
             document.getElementById("renderingWindow").ontouchstart = ($e) => {
                 previousX = $e.targetTouches[0].clientX;
+                $e.preventDefault();
+                return false;
             };
             document.getElementById("renderingWindow").ontouchmove = ($e) => {
                 const angle = ($e.targetTouches[0].clientX - previousX) * this.mobileRotationSensitivity;

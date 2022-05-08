@@ -10,14 +10,18 @@ if (isMobile == false) {
     document.addEventListener('click', () => { //full screen mode
         document.body.requestPointerLock();
     }, { once: false })
+
+    document.getElementById("jumpButton")!.style.display = "none";
 }
 else {
     //initialize joystick
     joy = new JoyStick('joyDiv', {internalFillColor: "#ff0000", internalStrokeColor: "#000000", externalStrokeColor: "#000000" });
 
     //initalize jump listener
-    document.getElementById("jumpButton")!.ontouchstart = () => {
+    document.getElementById("jumpButton")!.ontouchstart = ($e) => {
         jumpPressed = true;
+        $e.preventDefault();
+        return false;
     }
 }
 
