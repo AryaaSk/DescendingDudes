@@ -24,24 +24,19 @@ obstacleConfig.world = world;
 //Levels setup
 LevelConfig.player = player;
 LevelConfig.camera = camera;
-const levels = [];
-let currentLevelIndex = 0;
+let currentLevel = new Level();
 //CREATING LEVELS
 const loadLevel = (levelIndex) => {
-    for (let i = 0; i != world.bodies.length; i += 1) { //need to remove all bodies, so that the levels don't stack on top of each other
-        if (world.bodies[i].id != 0) {
-            world.remove(world.bodies[i]);
-        }
-    }
+    //need to remove all bodies, so that the levels don't stack on top of each other
     if (levelIndex == 0) {
-        const testLevel = new Level();
+        currentLevel = new Level();
         const rotatingDisc1 = new RotatingDisc({ radius: 400 }, Vector(0, 0, 0));
         const platform1 = new Platform({ width: 1000, depth: 3000 }, Vector(0, 0, 1500));
         const pendulumHammer1 = new PendulumHammer({ height: 300, gap: 400, hammerReach: 100, hammerSize: 100 }, Vector(-300, 0, 1500));
         const jumpBar1 = new JumpBar({ length: 800 }, Vector(0, 50, 0), { rotationSpeed: -1 });
         const jumpBar2 = new JumpBar({ length: 600 }, Vector(300, 5, 1500), { rotationSpeed: 1, colour: "#ff0000" });
         const rotatingDisc2 = new RotatingDisc({ radius: 300 }, Vector(0, 0, 3000), { colour: "#ff8000", rotationSpeed: -1 });
-        testLevel.obstacles = [
+        currentLevel.obstacles = [
             rotatingDisc1,
             platform1,
             pendulumHammer1,
@@ -49,7 +44,7 @@ const loadLevel = (levelIndex) => {
             jumpBar2,
             rotatingDisc2
         ];
-        testLevel.layers = {
+        currentLevel.layers = {
             bottom: [rotatingDisc1.base.aShape,
                 platform1.physicalObject.aShape,
                 rotatingDisc2.base.aShape],
@@ -61,17 +56,41 @@ const loadLevel = (levelIndex) => {
                 jumpBar1.bar.aShape,
                 jumpBar2.bar.aShape]
         };
-        levels.push(testLevel);
     }
-    currentLevelIndex = levelIndex;
-    levels[currentLevelIndex].spawnPlayer(Vector(0, 500, 0));
+    else if (levelIndex == 1) { //Just another test level, to test variation
+        currentLevel = new Level();
+        const rotatingDisc1 = new RotatingDisc({ radius: 400 }, Vector(0, 0, 0));
+        const platform1 = new Platform({ width: 1000, depth: 3000 }, Vector(0, 0, 1500));
+        const pendulumHammer1 = new PendulumHammer({ height: 500, gap: 400, hammerReach: 400, hammerSize: 100 }, Vector(-300, 0, 1500));
+        const jumpBar1 = new JumpBar({ length: 800 }, Vector(0, 50, 0), { rotationSpeed: -1 });
+        const jumpBar2 = new JumpBar({ length: 600 }, Vector(300, 5, 1500), { rotationSpeed: 1, colour: "#ff0000" });
+        const rotatingDisc2 = new RotatingDisc({ radius: 100 }, Vector(0, 0, 3000), { colour: "#ff0000", rotationSpeed: 10 });
+        currentLevel.obstacles = [
+            rotatingDisc1,
+            platform1,
+            pendulumHammer1,
+            jumpBar1,
+            jumpBar2,
+            rotatingDisc2
+        ];
+        currentLevel.layers = {
+            bottom: [rotatingDisc1.base.aShape,
+                platform1.physicalObject.aShape,
+                rotatingDisc2.base.aShape],
+            middle: [rotatingDisc1.disc.aShape,
+                jumpBar1.base.aShape,
+                jumpBar2.base.aShape,
+                rotatingDisc2.disc.aShape],
+            top: [pendulumHammer1.support.aShape, pendulumHammer1.hammer.aShape,
+                jumpBar1.bar.aShape,
+                jumpBar2.bar.aShape]
+        };
+    }
+    currentLevel.spawnPlayer(Vector(0, 500, 0));
 };
 //Game flow
-console.log(world.bodies);
-setTimeout(() => {
-    loadLevel(0);
-    console.log(world.bodies);
-}, 2000);
+loadLevel(0); //works if you only load 1 level, but I need to figure out how to reset the CANNON.World before loading a new level
+//The problem may be because the PlayerConfig and ObstacleConfig are still using the old CANNON.World, so I'll need to set those as well
 //ANIMATION LOOP
 setInterval(() => {
     //Handle keysdown
@@ -98,13 +117,13 @@ setInterval(() => {
     world.step(16 / 1000);
     //Sync aryaa3D Shapes
     player.update(camera, cameraOffset);
-    levels[currentLevelIndex].updateAShapes();
+    currentLevel.updateAShapes();
     //Render level
     clearCanvas();
-    levels[currentLevelIndex].renderLevel();
+    currentLevel.renderLevel();
     //check if player's y coordinate is < -400, if so then the player has fallen off the map and gets respawned
     if (player.physicsObject.cBody.position.y <= -400) {
         console.warn("Player died (y <= -400), respawning now...");
-        levels[currentLevelIndex].spawnPlayer(Vector(0, 500, 0));
+        currentLevel.spawnPlayer(Vector(0, 500, 0));
     }
 }, 16);
