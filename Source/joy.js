@@ -118,16 +118,11 @@
      // Check if the device support the touch or not
      if("ontouchstart" in document.documentElement)
      {
-         canvas.addEventListener("touchstart", onTouchStart, false);
-         document.addEventListener("touchmove", onTouchMove, false);
-         document.addEventListener("touchend", onTouchEnd, false);
+        canvas.addEventListener("touchstart", onTouchStart, false);
+        canvas.addEventListener("touchmove", onTouchMove, false);
+        canvas.addEventListener("touchend", onTouchEnd, false);
      }
-     else
-     {
-         canvas.addEventListener("mousedown", onMouseDown, false);
-         document.addEventListener("mousemove", onMouseMove, false);
-         document.addEventListener("mouseup", onMouseUp, false);
-     }
+
      // Draw the object
      drawExternal();
      drawInternal();
@@ -177,7 +172,7 @@
       */
      function onTouchStart(event) 
      {
-         pressed = 1;
+        pressed = 1;
      }
  
      function onTouchMove(event)

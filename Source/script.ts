@@ -18,10 +18,8 @@ else {
     joy = new JoyStick('joyDiv', {internalFillColor: "#ff0000", internalStrokeColor: "#000000", externalStrokeColor: "#000000" });
 
     //initalize jump listener
-    document.getElementById("jumpButton")!.ontouchstart = ($e) => {
+    document.getElementById("jumpButton")!.ontouchstart = () => {
         jumpPressed = true;
-        $e.preventDefault();
-        return false;
     }
 }
 
