@@ -1,10 +1,20 @@
 "use strict";
 //GameHelper Setup
 enableKeyListeners();
+let joy;
+let jumpPressed = false;
 if (isMobile == false) {
     document.addEventListener('click', () => {
         document.body.requestPointerLock();
     }, { once: false });
+}
+else {
+    //initialize joystick
+    joy = new JoyStick('joyDiv', { internalFillColor: "#ff0000", internalStrokeColor: "#000000", externalStrokeColor: "#000000" });
+    //initalize jump listener
+    document.getElementById("jumpButton").ontouchstart = () => {
+        jumpPressed = true;
+    };
 }
 //Aryaa3D Setup
 linkCanvas("renderingWindow");
@@ -47,28 +57,13 @@ const loadLevel = (levelIndex) => {
 };
 //Game flow, just load each level using loadLevel( levelIndex );
 loadLevel(0);
-//ANIMATION LOOP
 const gameLoop = setInterval(() => {
-    //Handle keysdown
-    const pMovement = Vector(0, 0, 0);
-    keysDown.forEach((key) => {
-        if (key == "w") {
-            pMovement.z += GameConfig.player.speed;
-        }
-        else if (key == "s") {
-            pMovement.z -= GameConfig.player.speed;
-        }
-        else if (key == "a") {
-            pMovement.x -= GameConfig.player.speed;
-        }
-        else if (key == "d") {
-            pMovement.x += GameConfig.player.speed;
-        }
-        else if (key == " ") {
-            GameConfig.player.jump(GameConfig.player.jumpForce); //validation happens inside player class
-        }
-    });
-    GameConfig.player.moveLocal(pMovement);
+    if (isMobile == false) {
+        handleKeysDown();
+    }
+    else {
+        handleMobileControls();
+    }
     //Update world / level
     currentLevel.updateCallback();
     GameConfig.world.step(16 / 1000);
@@ -95,3 +90,36 @@ const gameLoop = setInterval(() => {
         }
     }
 }, 16);
+const handleKeysDown = () => {
+    const pMovement = Vector(0, 0, 0);
+    keysDown.forEach((key) => {
+        if (key == "w") {
+            pMovement.z += GameConfig.player.speed;
+        }
+        else if (key == "s") {
+            pMovement.z -= GameConfig.player.speed;
+        }
+        else if (key == "a") {
+            pMovement.x -= GameConfig.player.speed;
+        }
+        else if (key == "d") {
+            pMovement.x += GameConfig.player.speed;
+        }
+        else if (key == " ") {
+            GameConfig.player.jump(GameConfig.player.jumpForce); //validation happens inside player class
+        }
+    });
+    GameConfig.player.moveLocal(pMovement);
+};
+const handleMobileControls = () => {
+    const maxiumumRadius = 100; //joystick.width / 2, or joystick.height, since they should be set to the same
+    const [x, y] = [joy.GetX(), joy.GetY()];
+    const pMovement = Vector(x, 0, y);
+    const pMovementNormalized = Vector(pMovement.x * (GameConfig.player.speed / maxiumumRadius), 0, pMovement.z * (GameConfig.player.speed / maxiumumRadius));
+    GameConfig.player.moveLocal(pMovementNormalized);
+    //If jump button was pressed then jumpPressed will be true
+    if (jumpPressed == true) {
+        GameConfig.player.jump(GameConfig.player.jumpForce);
+    }
+    jumpPressed = false;
+};

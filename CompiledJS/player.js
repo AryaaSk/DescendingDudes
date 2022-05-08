@@ -54,16 +54,15 @@ class Player {
         if (isMobile == false) {
             document.body.onmousemove = ($e) => {
                 const angle = $e.movementX * this.rotationSensitivity;
-                console.log(this.rotationSensitivity);
                 rotatePlayerCameraY(angle);
             };
         }
         else {
             let previousX = 0;
-            document.body.ontouchstart = ($e) => {
+            document.getElementById("renderingWindow").ontouchstart = ($e) => {
                 previousX = $e.targetTouches[0].clientX;
             };
-            document.body.ontouchmove = ($e) => {
+            document.getElementById("renderingWindow").ontouchmove = ($e) => {
                 const angle = ($e.targetTouches[0].clientX - previousX) * this.mobileRotationSensitivity;
                 previousX = $e.targetTouches[0].clientX;
                 rotatePlayerCameraY(angle);
