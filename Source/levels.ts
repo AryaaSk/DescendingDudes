@@ -9,6 +9,7 @@ const LevelConfig: {
 class Level { //Levels work by taking in all the references to the obstacles and also their aShapes, it is very important that they are references
     obstacles: Obstacle[] = [];
     layers: { bottom: Shape[], middle: Shape[], top: Shape[] } = { bottom: [], middle: [], top: [] };
+    updateCallback: (() => void) = () => {}; //DO NOT USE THIS FOR UPDATING ARYAA3D SHAPES, if the level wants to perform an action which is not performed by individual obstacles, e.g. a moving platform. 
 
     constructor() {
         if (LevelConfig.player == undefined) {
@@ -24,7 +25,7 @@ class Level { //Levels work by taking in all the references to the obstacles and
     spawnPlayer( playerPosition: XYZ ) {
         LevelConfig.player!.physicsObject.cBody.position.set( playerPosition.x, playerPosition.y, playerPosition.z );
     }
-
+    
     updateAShapes() {
         for (const obstacle of this.obstacles) {
             obstacle.update();
@@ -52,13 +53,18 @@ const DemoLevel = () => {
     const pendulumHammer1 = new PendulumHammer( { height: 300, gap: 400, hammerReach: 200, hammerSize: 100 }, Vector( -300, 0, 1500 ) );
     const jumpBar1 = new JumpBar( { length: 800 }, Vector(0, 50, 0), { rotationSpeed: -1 });
     const jumpBar2 = new JumpBar( { length: 600 }, Vector(300, 5, 1500), { rotationSpeed: 1, colour: "#ff0000" });
+    const movingPlatform1 = new Platform( { width: 400, depth: 200, thickness: 30 }, Vector( 600, 100, 2000 ), { colour: "#0000ff" });
+    const movingPlatform2 = new Platform( { width: 400, depth: 200, thickness: 30 }, Vector( -600, 100, 2000 ), { colour: "#0000ff" });
     const rotatingDisc2 = new RotatingDisc( { radius: 300 }, Vector(0, 0, 3000), { colour: "#ff8000", rotationSpeed: -1 });
+
     level.obstacles =  [
         rotatingDisc1, 
         platform1, 
         pendulumHammer1, 
         jumpBar1, 
         jumpBar2, 
+        movingPlatform1,
+        movingPlatform2,
         rotatingDisc2
     ];
 
@@ -70,15 +76,33 @@ const DemoLevel = () => {
         middle: [rotatingDisc1.disc.aShape,
                 jumpBar1.base.aShape,
                 jumpBar2.base.aShape,
-                rotatingDisc2.disc.aShape],
+                rotatingDisc2.disc.aShape,
+                movingPlatform1.physicalObject.aShape,
+                movingPlatform2.physicalObject.aShape],
     
         top:    [pendulumHammer1.support.aShape, pendulumHammer1.hammer.aShape,
                 jumpBar1.bar.aShape,
                 jumpBar2.bar.aShape]
     };
+
+    let movingPlatform1Direction = 5;
+    let movingPlatform2Direction = -5;
+    level.updateCallback = () => {
+        if (movingPlatform1.physicalObject.cBody.position.x >= 1400) { movingPlatform1Direction = -5; }
+        else if (movingPlatform1.physicalObject.cBody.position.x <= 600) { movingPlatform1Direction = 5; }
+        movingPlatform1.physicalObject.cBody.position.x += movingPlatform1Direction;
+
+        if (movingPlatform2.physicalObject.cBody.position.x >= -600) { movingPlatform2Direction = -5; }
+        else if (movingPlatform2.physicalObject.cBody.position.x <= -1400) { movingPlatform2Direction = 5; }
+        movingPlatform2.physicalObject.cBody.position.x += movingPlatform2Direction;
+    }
+
     return level;
 }
 levels.push(DemoLevel)
+
+
+
 
 const DemoLevel2 = () => {//creating level in new scope so that the obstacle names don't interfere with each other
     const level = new Level()
@@ -89,6 +113,7 @@ const DemoLevel2 = () => {//creating level in new scope so that the obstacle nam
     const jumpBar1 = new JumpBar( { length: 800 }, Vector(0, 50, 0), { rotationSpeed: -1 });
     const jumpBar2 = new JumpBar( { length: 600 }, Vector(300, 5, 1500), { rotationSpeed: 1, colour: "#ff0000" });
     const rotatingDisc2 = new RotatingDisc( { radius: 500 }, Vector(0, 0, 3000), { colour: "#ff00ff", rotationSpeed: -2.5 });
+
     level.obstacles =  [
         rotatingDisc1, 
         platform1, 
@@ -112,6 +137,7 @@ const DemoLevel2 = () => {//creating level in new scope so that the obstacle nam
                 jumpBar1.bar.aShape,
                 jumpBar2.bar.aShape]
     };
+
     return level;
 }
 levels.push(DemoLevel2)

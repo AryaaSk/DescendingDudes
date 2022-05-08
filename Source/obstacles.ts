@@ -14,13 +14,11 @@ class Obstacle { //When specifying obstacle's position, user should not need to 
         }
     }
 
-    update() {
-        //code is inside individual subclasses
-    }
+    update() { } //code is inside individual subclasses
 }
 
 class Platform extends Obstacle {
-    static height: number = 10;
+    static thickness: number = 10;
     static defaultColour: string = "#ffff00";
 
     width: number;
@@ -28,13 +26,14 @@ class Platform extends Obstacle {
 
     physicalObject: PhysicsObject;
 
-    constructor ( dimensions: { width: number, depth: number }, position: XYZ, options?: { colour?: string } ) {
+    constructor ( dimensions: { width: number, depth: number, thickness?: number }, position: XYZ, options?: { colour?: string } ) {
         super();
         this.width = dimensions.width;
         this.depth = dimensions.depth;
         this.position = position;
 
-        const aShape = new Box( this.width, Platform.height, this.depth );
+        const thickness = (dimensions.thickness == undefined) ? Platform.thickness : dimensions.thickness;
+        const aShape = new Box( this.width, thickness, this.depth );
         this.physicalObject = new PhysicsObject( ObstacleConfig.world!, aShape, new CANNON.Body( { mass: 0 } ) );
         this.physicalObject.cBody.position.set( this.position.x, this.position.y, this.position.z );
         this.physicalObject.cBody.id = -1; //so that player can recognise and reset jump

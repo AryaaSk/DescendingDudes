@@ -47,7 +47,6 @@ const loadLevel = ( levelIndex: number ) => {
     
 //Game flow, just load each level using loadLevel( levelIndex );
 loadLevel( 0 );
-loadLevel( 1 );
 
 
 
@@ -68,7 +67,8 @@ setInterval(() => {
     })
     player.moveLocal( pMovement );
 
-    //Update world
+    //Update world / level
+    currentLevel.updateCallback();
     world.step(16 / 1000);
 
     //Sync aryaa3D Shapes

@@ -10,9 +10,7 @@ class Obstacle {
             return;
         }
     }
-    update() {
-        //code is inside individual subclasses
-    }
+    update() { } //code is inside individual subclasses
 }
 class Platform extends Obstacle {
     constructor(dimensions, position, options) {
@@ -20,7 +18,8 @@ class Platform extends Obstacle {
         this.width = dimensions.width;
         this.depth = dimensions.depth;
         this.position = position;
-        const aShape = new Box(this.width, Platform.height, this.depth);
+        const thickness = (dimensions.thickness == undefined) ? Platform.thickness : dimensions.thickness;
+        const aShape = new Box(this.width, thickness, this.depth);
         this.physicalObject = new PhysicsObject(ObstacleConfig.world, aShape, new CANNON.Body({ mass: 0 }));
         this.physicalObject.cBody.position.set(this.position.x, this.position.y, this.position.z);
         this.physicalObject.cBody.id = -1; //so that player can recognise and reset jump
@@ -32,7 +31,7 @@ class Platform extends Obstacle {
         this.physicalObject.syncAShape();
     }
 }
-Platform.height = 10;
+Platform.thickness = 10;
 Platform.defaultColour = "#ffff00";
 class RotatingDisc extends Obstacle {
     constructor(dimensions, position, options) {
