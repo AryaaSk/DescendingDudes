@@ -2,8 +2,15 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>Descending Dudes</title>
+
+    <script> //checking if it is onMobile
+        let isMobile = false;
+        if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)){
+            isMobile = true;
+        }
+    </script>
 
     <!-- Using gitcdn instead of github pages since I don't want to make too many requests to the github pages -->
     <script src="https://gitcdn.link/cdn/AryaaSk/3D-Engine/085cc200d9c5dfc9fb28f609a7ecc15b184b6be2/Source/aryaa3D.js"></script>
@@ -16,8 +23,26 @@
     <script src="/CompiledJS/script.js" defer></script>
 
     <style>
+        .mobileFriendly {
+            /*IOS safari to prevent double tap zoom and center button text properly */
+            -webkit-appearance: initial;
+            padding-left: 0; 
+            padding-right: 0;
+            touch-action: manipulation;
+
+            /* To prevent user from selecting the text */
+            -webkit-touch-callout: none; /* iOS Safari */
+            -webkit-user-select: none; /* Safari */
+            -khtml-user-select: none; /* Konqueror HTML */
+            -moz-user-select: none; /* Old versions of Firefox */
+                -ms-user-select: none; /* Internet Explorer/Edge */
+                    user-select: none; /* Non-prefixed version, currently
+                                        supported by Chrome, Edge, Opera and Firefox */
+        }
+
         body {
             margin: 0;
+            overflow: hidden;
         }
         #renderingWindow {
             height: 100vh;
@@ -28,7 +53,7 @@
 </head>
 
 <body>
-    <canvas id="renderingWindow"></canvas>
+    <canvas class="mobileFriendly" id="renderingWindow"></canvas>
 </body>
 
 </html>

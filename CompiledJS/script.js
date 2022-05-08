@@ -1,9 +1,11 @@
 "use strict";
 //GameHelper Setup
 enableKeyListeners();
-document.addEventListener('click', () => {
-    document.body.requestPointerLock();
-}, { once: false });
+if (isMobile == false) {
+    document.addEventListener('click', () => {
+        document.body.requestPointerLock();
+    }, { once: false });
+}
 //Aryaa3D Setup
 linkCanvas("renderingWindow");
 //Config Setups
@@ -14,6 +16,14 @@ GameConfig.camera.rotation.x = 20;
 GameConfig.camera.updateRotationMatrix();
 GameConfig.camera.clipOffset = 10;
 ;
+if (isMobile == true) { //adjusting proportions so it is easier to see on mobile
+    const cameraZoomWidth = (window.innerWidth) / 800;
+    const cameraZoomHeight = (window.innerHeight) / 800;
+    GameConfig.camera.zoom = cameraZoomWidth; //set to lowest
+    if (cameraZoomHeight < cameraZoomWidth) {
+        GameConfig.camera.zoom = cameraZoomHeight;
+    }
+}
 const cameraOffset = Vector(0, 500, -800);
 const resetConfigs = () => {
     GameConfig.world = new CANNON.World(); //Need to remove all bodies, so that the levels don't stack on top of each other

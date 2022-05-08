@@ -1,9 +1,13 @@
+declare let isMobile: boolean;
+
 //GameHelper Setup
 enableKeyListeners();
 
-document.addEventListener('click', () => { //full screen mode
-    document.body.requestPointerLock();
-}, { once: false })
+if (isMobile == false) {
+    document.addEventListener('click', () => { //full screen mode
+        document.body.requestPointerLock();
+    }, { once: false })
+}
 
 //Aryaa3D Setup
 linkCanvas("renderingWindow")
@@ -19,6 +23,15 @@ GameConfig.camera = new PerspectiveCamera();; //camera never gets reset so we le
 GameConfig.camera.rotation.x = 20;
 GameConfig.camera.updateRotationMatrix();
 GameConfig.camera.clipOffset = 10;;
+
+if (isMobile == true) { //adjusting proportions so it is easier to see on mobile
+    const cameraZoomWidth = (window.innerWidth) / 800;
+    const cameraZoomHeight = (window.innerHeight) / 800;
+    GameConfig.camera.zoom = cameraZoomWidth; //set to lowest
+    if (cameraZoomHeight < cameraZoomWidth) {
+        GameConfig.camera.zoom = cameraZoomHeight;
+    }
+}
 const cameraOffset = Vector( 0, 500, -800 );
 
 const resetConfigs = () => {
@@ -45,6 +58,8 @@ const loadLevel = ( levelIndex: number ) => {
     currentLevel.spawnPlayer( currentLevel.spawnPoint );
 }
     
+
+
 //Game flow, just load each level using loadLevel( levelIndex );
 loadLevel( 0 );
 

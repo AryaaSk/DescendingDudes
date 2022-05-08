@@ -5,6 +5,7 @@ class Player {
     speed: number = 10;
     jumpForce: number = 500;
     rotationSensitivity = 0.1;
+    mobileRotationSensitivity = 0.5;
 
     constructor ( world: CANNON.World, camera: PerspectiveCamera ) {
         this.physicsObject = new PhysicsObject( world, new Box(100, 200, 100), new CANNON.Body( { mass: 1, material: new CANNON.Material() } ) )
@@ -43,19 +44,39 @@ class Player {
     }
 
     update( camera: PerspectiveCamera, cameraOffset: XYZ ) {
-        GameConfig.player!.physicsObject.syncAShape();
-        GameConfig.player!.syncCameraPosition( camera, cameraOffset );
+        this.physicsObject.syncAShape();
+        this.syncCameraPosition( camera, cameraOffset );
     }
-    thirdPersonCamera( camera: PerspectiveCamera ) { //Thid Person Camera
-        document.body.addEventListener('mousemove', ($e) => {
-            const yRotationQuaternion = eulerToQuaternion( Euler( 0, $e.movementX * this.rotationSensitivity, 0 ) );
-            const currentRotationQuaternion = { x: GameConfig.player!.physicsObject.cBody.quaternion.x, y: GameConfig.player!.physicsObject.cBody.quaternion.y, z: GameConfig.player!.physicsObject.cBody.quaternion.z, w: GameConfig.player!.physicsObject.cBody.quaternion.w };
+    thirdPersonCamera( camera: PerspectiveCamera ) { //Third Person Camera
+        const rotatePlayerCameraY = (angle: number) => {
+            const yRotationQuaternion = eulerToQuaternion( Euler( 0, angle, 0 ) );
+            const currentRotationQuaternion = { x: this.physicsObject.cBody.quaternion.x, y: this.physicsObject.cBody.quaternion.y, z: this.physicsObject.cBody.quaternion.z, w: this.physicsObject.cBody.quaternion.w };
             const resultQuaternion = multiplyQuaternions( currentRotationQuaternion, yRotationQuaternion );
-            GameConfig.player!.physicsObject.cBody.quaternion.set( resultQuaternion.x, resultQuaternion.y, resultQuaternion.z, resultQuaternion.w );
+            this.physicsObject.cBody.quaternion.set( resultQuaternion.x, resultQuaternion.y, resultQuaternion.z, resultQuaternion.w );
         
-            camera.rotation.y += $e.movementX * this.rotationSensitivity; //cant sync camera's rotation since we don't have access to the player's y rotation, only quaternion
+            camera.rotation.y += angle; //cant sync camera's rotation since we don't have access to the player's y rotation, only quaternion
             camera.updateRotationMatrix();
-        })        
+        }
+
+        //Not using event listeners since they stack up whenever a new player object is created
+        if (isMobile == false) {
+            document.body.onmousemove = ($e) => {
+                const angle = $e.movementX * this.rotationSensitivity;
+                console.log(this.rotationSensitivity);
+                rotatePlayerCameraY( angle );
+            }
+        }
+        else {
+            let previousX = 0;
+            document.body.ontouchstart = ($e) => {
+                previousX = $e.targetTouches[0].clientX;
+            }
+            document.body.ontouchmove = ($e) => {
+                const angle = ($e.targetTouches[0].clientX - previousX) * this.mobileRotationSensitivity;
+                previousX = $e.targetTouches[0].clientX
+                rotatePlayerCameraY( angle );
+            }
+        }
     }
     syncCameraPosition(camera: PerspectiveCamera, cameraOffset: XYZ) { //Sync Camera behind player, by rotating vector from player -> camera
         const playerCameraVector = JSON.parse(JSON.stringify( cameraOffset ));
