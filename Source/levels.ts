@@ -43,7 +43,8 @@ class Level { //Levels work by taking in all the references to the obstacles and
 
 
 //Actual Levels
-const DemoLevel = () => {//creating level in new scope so that the obstacle names don't interfere with each other
+const levels: (() => Level)[] = []; //an array of functions, which will return a level when called
+const DemoLevel = () => {
     const level = new Level()
 
     const rotatingDisc1 = new RotatingDisc( { radius: 400 }, Vector(0, 0, 0));
@@ -77,16 +78,17 @@ const DemoLevel = () => {//creating level in new scope so that the obstacle name
     };
     return level;
 }
+levels.push(DemoLevel)
 
 const DemoLevel2 = () => {//creating level in new scope so that the obstacle names don't interfere with each other
     const level = new Level()
 
     const rotatingDisc1 = new RotatingDisc( { radius: 400 }, Vector(0, 0, 0));
     const platform1 = new Platform( { width: 1000, depth: 3000 }, Vector( 0, 0, 1500 ) );
-    const pendulumHammer1 = new PendulumHammer( { height: 300, gap: 400, hammerReach: 175, hammerSize: 100 }, Vector( -300, 0, 1500 ) );
+    const pendulumHammer1 = new PendulumHammer( { height: 600, gap: 400, hammerReach: 500, hammerSize: 150 }, Vector( -300, 0, 1500 ), { colour: "#800080", rotationSpeed: 2 });
     const jumpBar1 = new JumpBar( { length: 800 }, Vector(0, 50, 0), { rotationSpeed: -1 });
     const jumpBar2 = new JumpBar( { length: 600 }, Vector(300, 5, 1500), { rotationSpeed: 1, colour: "#ff0000" });
-    const rotatingDisc2 = new RotatingDisc( { radius: 500 }, Vector(0, 0, 3000), { colour: "#ff0000", rotationSpeed: -10 });
+    const rotatingDisc2 = new RotatingDisc( { radius: 500 }, Vector(0, 0, 3000), { colour: "#ff00ff", rotationSpeed: -2.5 });
     level.obstacles =  [
         rotatingDisc1, 
         platform1, 
@@ -112,3 +114,4 @@ const DemoLevel2 = () => {//creating level in new scope so that the obstacle nam
     };
     return level;
 }
+levels.push(DemoLevel2)

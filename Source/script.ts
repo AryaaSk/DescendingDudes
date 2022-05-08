@@ -22,7 +22,7 @@ let player: Player;
 LevelConfig.camera = camera; //camera never gets reset so we leave it outside the resetConfigs()
 
 const resetConfigs = () => {
-    world = new CANNON.World();
+    world = new CANNON.World(); //need to remove all bodies, so that the levels don't stack on top of each other
     world.gravity.set( 0, -9.82 * 100, 0 );
 
     player = new Player( world, camera ); //supplying the new objects to the config variables
@@ -35,26 +35,19 @@ const resetConfigs = () => {
 let currentLevel: Level;
 
 const loadLevel = ( levelIndex: number ) => {
-    //need to remove all bodies, so that the levels don't stack on top of each other
-    resetConfigs();
-    
-    switch (levelIndex){
-        case 0:
-            currentLevel = DemoLevel();
-            break;
-        case 1:
-            currentLevel = DemoLevel2();
-            break;
-
-        default:
-            console.error("Invalid level index");
+    if (levelIndex >= levels.length) {
+        console.error(`CANNOT LOAD LEVEL ${String(levelIndex)}: invalid level index`);
+        return;
     }
 
+    resetConfigs();
+    currentLevel = levels[levelIndex]();
     currentLevel.spawnPlayer( Vector(0, 500, 0) );
 }
     
 //Game flow, just load each level using loadLevel( levelIndex );
 loadLevel( 0 );
+loadLevel( 1 );
 
 
 
