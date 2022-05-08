@@ -1,7 +1,7 @@
 //Setup
 //CannonJS Setup
-const world = new CANNON.World();
-world.gravity.set(0, -9.82 * 100, 0); // *100 to scale into the world
+let world = new CANNON.World();
+world.gravity.set( 0, -9.82 * 100, 0 );
 
 //Aryaa3D Setup
 linkCanvas("renderingWindow")
@@ -19,29 +19,84 @@ document.addEventListener('click', () => { //full screen mode
 }, { once: false })
 
 
-
-//Player
+//Player setup
 const player = new Player( world, camera);
-player.physicsObject.cBody.position.set(0, 500, 0);
+player.physicsObject.aShape.setColour("#ffffff80");
 
-
-
-
-
-//Obstacles, ordered in order of appearance in the Level
+//Obstacles setup
 obstacleConfig.world = world;
 
-const rotatingDisc1 = new RotatingDisc( { radius: 400 }, Vector(0, 0, 0));
+//Levels setup
+LevelConfig.player = player;
+LevelConfig.camera = camera;
 
-const platform1 = new Platform( { width: 1000, depth: 3000 }, Vector( 0, 0, 1500 ) );
+const levels: Level[] = [];
+let currentLevelIndex = 0;
 
-const pendulumHammer1 = new PendulumHammer( { height: 300, gap: 400, hammerReach: 100, hammerSize: 100 }, Vector( -300, 0, 1500 ) );
 
-const jumpBar1 = new JumpBar( { length: 800 }, Vector(0, 50, 0), { rotationSpeed: -1 });
+//CREATING LEVELS
+const loadLevel = ( levelIndex: number ) => {
+    for (let i = 0; i != world.bodies.length; i += 1) { //need to remove all bodies, so that the levels don't stack on top of each other
+        if (world.bodies[i].id != 0) {
+            world.remove( world.bodies[i] );
+        }
+    }
 
-const jumpBar2 = new JumpBar( { length: 600 }, Vector(300, 100, 1500), { rotationSpeed: 1, colour: "#ff0000" });
+    if ( levelIndex == 0 ) {
+        const testLevel = new Level()
 
-const rotatingDisc2 = new RotatingDisc( { radius: 300 }, Vector(0, 0, 3000), { colour: "#ff8000", rotationSpeed: -1 });
+        const rotatingDisc1 = new RotatingDisc( { radius: 400 }, Vector(0, 0, 0));
+        const platform1 = new Platform( { width: 1000, depth: 3000 }, Vector( 0, 0, 1500 ) );
+        const pendulumHammer1 = new PendulumHammer( { height: 300, gap: 400, hammerReach: 100, hammerSize: 100 }, Vector( -300, 0, 1500 ) );
+        const jumpBar1 = new JumpBar( { length: 800 }, Vector(0, 50, 0), { rotationSpeed: -1 });
+        const jumpBar2 = new JumpBar( { length: 600 }, Vector(300, 5, 1500), { rotationSpeed: 1, colour: "#ff0000" });
+        const rotatingDisc2 = new RotatingDisc( { radius: 300 }, Vector(0, 0, 3000), { colour: "#ff8000", rotationSpeed: -1 });
+
+        testLevel.obstacles =  [
+            rotatingDisc1, 
+            platform1, 
+            pendulumHammer1, 
+            jumpBar1, 
+            jumpBar2, 
+            rotatingDisc2
+        ];
+        testLevel.layers =  {   
+            bottom: [rotatingDisc1.base.aShape,  
+                    platform1.physicalObject.aShape, 
+                    rotatingDisc2.base.aShape], 
+        
+            middle: [rotatingDisc1.disc.aShape,
+                    jumpBar1.base.aShape,
+                    jumpBar2.base.aShape,
+                    rotatingDisc2.disc.aShape],
+        
+            top:    [pendulumHammer1.support.aShape, pendulumHammer1.hammer.aShape,
+                    jumpBar1.bar.aShape,
+                    jumpBar2.bar.aShape]
+        };
+        levels.push( testLevel );
+
+        
+    }
+
+    currentLevelIndex = levelIndex;
+    levels[currentLevelIndex].spawnPlayer( Vector(0, 500, 0) );
+}
+    
+
+
+
+
+
+
+//Game flow
+console.log(world.bodies);
+setTimeout(() => {
+    loadLevel( 0 );
+    console.log(world.bodies);
+}, 2000);
+
+
 
 
 
@@ -63,43 +118,21 @@ setInterval(() => {
     })
     player.moveLocal( pMovement );
 
-
     //Update world
     world.step(16 / 1000);
 
     //Sync aryaa3D Shapes
     player.update( camera, cameraOffset );
-    rotatingDisc1.update();
-    platform1.update();
-    pendulumHammer1.update();
-    jumpBar1.update();
-    jumpBar2.update();
-    rotatingDisc2.update();
+    levels[currentLevelIndex].updateAShapes();
 
-    //multiple render function calls for different y-values, since we limited rotation, the items will always be on top / parallel to each other
+    //Render level
     clearCanvas();
-    camera.render([ //Bottom Layer (platforms)
-        rotatingDisc1.base.aShape, 
-        platform1.physicalObject.aShape,
-        rotatingDisc2.base.aShape
-    ]);
-    camera.render([ //Middle layer, for obstacles such as moving platforms and bases
-        rotatingDisc1.disc.aShape,
-        jumpBar1.base.aShape,
-        jumpBar2.base.aShape,
-        rotatingDisc2.disc.aShape
-    ]);
-    camera.render([ //Top layer, for rendering player and player height obstacles
-        player.physicsObject.aShape,
-        pendulumHammer1.support.aShape, pendulumHammer1.hammer.aShape,
-        jumpBar1.bar.aShape,
-        jumpBar2.bar.aShape
-    ]);
+    levels[currentLevelIndex].renderLevel();
 
-    //check if player's y coordinate is < -400, if so then the player has fallen off the map
+    //check if player's y coordinate is < -400, if so then the player has fallen off the map and gets respawned
     if (player.physicsObject.cBody.position.y <= -400) {
         console.warn("Player died (y <= -400), respawning now...");
-        player.physicsObject.cBody.position.set(0, 500, 0);
+        levels[currentLevelIndex].spawnPlayer( Vector(0, 500, 0) );
     }
 
 }, 16);

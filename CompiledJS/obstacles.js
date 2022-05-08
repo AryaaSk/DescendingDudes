@@ -10,6 +10,9 @@ class Obstacle {
             return;
         }
     }
+    update() {
+        //code is inside individual subclasses
+    }
 }
 class Platform extends Obstacle {
     constructor(dimensions, position, options) {

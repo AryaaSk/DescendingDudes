@@ -13,6 +13,10 @@ class Obstacle { //When specifying obstacle's position, user should not need to 
             return;
         }
     }
+
+    update() {
+        //code is inside individual subclasses
+    }
 }
 
 class Platform extends Obstacle {
@@ -40,7 +44,7 @@ class Platform extends Obstacle {
         this.physicalObject.aShape.showOutline();
     }
 
-    update() {
+    override update() {
         this.physicalObject.syncAShape();
     }
 }
@@ -85,7 +89,7 @@ class RotatingDisc extends Obstacle {
         this.disc.aShape.showOutline();
     }
 
-    update() {
+    override update() {
         this.base.syncAShape();
         this.disc.cBody.position.x = this.position.x; //Stop disc from falling off surface
         this.disc.cBody.position.z = this.position.z;
@@ -149,7 +153,7 @@ class PendulumHammer extends Obstacle {
     }
     
 
-    update() {
+    override update() {
         this.support.syncAShape();
         this.tickRotation();
     }
@@ -203,7 +207,7 @@ class JumpBar extends Obstacle {
         this.bar.aShape.showOutline();
     }
 
-    update() {
+    override update() {
         this.base.syncAShape();
         this.bar.cBody.position.x = this.position.x; //Stop bar from falling off surface
         this.bar.cBody.position.z = this.position.z;
