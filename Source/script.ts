@@ -25,6 +25,8 @@ const resetConfigs = () => {
     GameConfig.world = new CANNON.World(); //Need to remove all bodies, so that the levels don't stack on top of each other
     GameConfig.world.gravity.set( 0, -9.82 * 100, 0 );
     GameConfig.player = new Player( GameConfig.world, GameConfig.camera! ); //Creating a new Player object with the newly created CANNON World
+    GameConfig.camera!.rotation.y = 0; //Resetting camera rotation, since player rotation will also be reset
+    GameConfig.camera!.updateRotationMatrix();
 }
 
 //Levels
