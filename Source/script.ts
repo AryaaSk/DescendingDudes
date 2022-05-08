@@ -42,7 +42,7 @@ const loadLevel = ( levelIndex: number ) => {
 
         const rotatingDisc1 = new RotatingDisc( { radius: 400 }, Vector(0, 0, 0));
         const platform1 = new Platform( { width: 1000, depth: 3000 }, Vector( 0, 0, 1500 ) );
-        const pendulumHammer1 = new PendulumHammer( { height: 300, gap: 400, hammerReach: 100, hammerSize: 100 }, Vector( -300, 0, 1500 ) );
+        const pendulumHammer1 = new PendulumHammer( { height: 300, gap: 400, hammerReach: 175, hammerSize: 100 }, Vector( -300, 0, 1500 ) );
         const jumpBar1 = new JumpBar( { length: 800 }, Vector(0, 50, 0), { rotationSpeed: -1 });
         const jumpBar2 = new JumpBar( { length: 600 }, Vector(300, 5, 1500), { rotationSpeed: 1, colour: "#ff0000" });
         const rotatingDisc2 = new RotatingDisc( { radius: 300 }, Vector(0, 0, 3000), { colour: "#ff8000", rotationSpeed: -1 });

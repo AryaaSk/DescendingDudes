@@ -123,7 +123,7 @@ class PendulumHammer extends Obstacle {
         const support = constructObjectFromPrimatives( [
             new PrimativeBox( { width: PendulumHammer.supportThickness, height: this.height, depth: PendulumHammer.supportThickness }, Vector( -(this.gap / 2) + (PendulumHammer.supportThickness / 2), 0, 0 ) ),
             new PrimativeBox( { width: PendulumHammer.supportThickness, height: this.height, depth: PendulumHammer.supportThickness }, Vector( (this.gap / 2) - (PendulumHammer.supportThickness / 2), 0, 0 ) ),
-            new PrimativeBox( { width: this.gap, height: PendulumHammer.supportBarHeight, depth: PendulumHammer.supportThickness }, Vector( 0, this.height / 2, 0 ))
+            new PrimativeBox( { width: this.gap, height: PendulumHammer.supportBarHeight, depth: PendulumHammer.supportThickness }, Vector( 0, (this.height / 2) + (PendulumHammer.supportBarHeight / 2), 0 ))
         ], 0)
         support.aShape.position = JSON.parse(JSON.stringify(this.position));
         support.aShape.position.y += this.height / 2;
@@ -135,7 +135,7 @@ class PendulumHammer extends Obstacle {
             new PrimativeBox( { width: hammerSize, height: hammerSize, depth: hammerSize * 1.5 }, Vector( 0, -(this.hammerReach) - (hammerSize / 2), 0 ) )
         ], 0);
         hammer.aShape.position = JSON.parse(JSON.stringify(this.position));
-        hammer.aShape.position.y += (this.height) - (PendulumHammer.supportBarHeight * 0.25); //want hammer to look like it is hanging from the support bar
+        hammer.aShape.position.y += (this.height) + (PendulumHammer.supportBarHeight / 2); //want hammer to look like it is hanging from the support bar
         this.hammer = new PhysicsObject( obstacleConfig.world!, hammer.aShape, hammer.cBody );
         
         this.support.cBody.material = new CANNON.Material( { friction: 0 } );
