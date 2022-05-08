@@ -57,30 +57,38 @@
             height: 100vh;
             width: 100vw;
         }
+
         #joyDiv {
             position: fixed;
-            height: 200px;
-            width: 200px;
-
             left: 0;
             bottom: 0;
+            height: 200px;
+            width: 200px;
         }
+
         #jumpButton {
             position: fixed;
-            height: 125px;
-            width: 125px;
+            right: 25px;
+            bottom: 50px;
+            height: 100px;
+            width: 100px;
 
-            right: 30px;
-            bottom: 30px;
+            border: 1px solid black;
+            background-color: rgba(251, 0, 7, 0.8);
+            font-size: larger;
+            color: black;
+        }
+        #jumpButton:active {
+            background-color: rgba(195, 0, 4, 0.8);
         }
     </style>
 
 </head>
 
-<body>
+<body ontouchstart>
     <canvas class="mobileFriendly" id="renderingWindow"></canvas>
     <div class="mobileFriendly" id="joyDiv"></div>
-    <input type="button" class="mobileFriendly" id="jumpButton" value="Jump">
+    <input class="mobileFriendly" type="button" id="jumpButton" value="Jump">
 </body>
 
 </html>
