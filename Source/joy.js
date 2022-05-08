@@ -184,8 +184,8 @@
      {
          if(pressed === 1 && event.targetTouches[0].target === canvas)
          {
-             movedX = event.targetTouches[0].pageX;
-             movedY = event.targetTouches[0].pageY;
+             movedX = event.targetTouches[0].clientX;
+             movedY = event.targetTouches[0].clientY;
              // Manage offset
              if(canvas.offsetParent.tagName.toUpperCase() === "BODY")
              {
