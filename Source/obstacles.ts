@@ -169,7 +169,7 @@ class JumpBar extends Obstacle {
     static defaultRotationSpeed: number = 1;
     static baseSize: number = 50;
     static baseHeight: number = 10;
-    static barThickness: number = 50;
+    static barThickness: number = 40;
 
     length: number;
 
@@ -185,12 +185,12 @@ class JumpBar extends Obstacle {
         baseAShape.position = JSON.parse(JSON.stringify(this.position));
         const bar = constructObjectFromPrimatives([
             new PrimativeBox( { width: this.length, height: JumpBar.barThickness, depth: JumpBar.barThickness }, Vector(0, 0, 0 ) )
-        ], 100);
+        ], 10000);
         bar.aShape.position = JSON.parse(JSON.stringify(this.position));
         bar.aShape.position.y += JumpBar.baseHeight + (JumpBar.barThickness / 2);
         bar.cBody.material = new CANNON.Material( { friction: 0 } );
 
-        this.base = new PhysicsObject( obstacleConfig.world!, baseAShape, new CANNON.Body({ mass: 0, material: new CANNON.Material( { friction: 0 } )}) );
+        this.base = new PhysicsObject( obstacleConfig.world!, baseAShape, new CANNON.Body({ mass: 0, material: new CANNON.Material( { friction: 1 } )}) );
         this.bar = new PhysicsObject( obstacleConfig.world!, bar.aShape, bar.cBody );
 
         const rotationSpeed = (options?.rotationSpeed == undefined) ? JumpBar.defaultRotationSpeed : options?.rotationSpeed;

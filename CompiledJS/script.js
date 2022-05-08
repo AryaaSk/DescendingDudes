@@ -68,13 +68,15 @@ setInterval(() => {
     ]);
     camera.render([
         rotatingDisc1.disc.aShape,
-        rotatingDisc2.disc.aShape,
+        jumpBar1.base.aShape,
+        jumpBar2.base.aShape,
+        rotatingDisc2.disc.aShape
     ]);
     camera.render([
         player.physicsObject.aShape,
         pendulumHammer1.support.aShape, pendulumHammer1.hammer.aShape,
-        jumpBar1.base.aShape, jumpBar1.bar.aShape,
-        jumpBar2.base.aShape, jumpBar2.bar.aShape
+        jumpBar1.bar.aShape,
+        jumpBar2.bar.aShape
     ]);
     //check if player's y coordinate is < -400, if so then the player has fallen off the map
     if (player.physicsObject.cBody.position.y <= -400) {

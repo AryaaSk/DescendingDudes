@@ -83,15 +83,17 @@ setInterval(() => {
         platform1.physicalObject.aShape,
         rotatingDisc2.base.aShape
     ]);
-    camera.render([ //Middle layer, for obstacles such as moving platforms
+    camera.render([ //Middle layer, for obstacles such as moving platforms and bases
         rotatingDisc1.disc.aShape,
-        rotatingDisc2.disc.aShape,
+        jumpBar1.base.aShape,
+        jumpBar2.base.aShape,
+        rotatingDisc2.disc.aShape
     ]);
     camera.render([ //Top layer, for rendering player and player height obstacles
         player.physicsObject.aShape,
         pendulumHammer1.support.aShape, pendulumHammer1.hammer.aShape,
-        jumpBar1.base.aShape, jumpBar1.bar.aShape,
-        jumpBar2.base.aShape, jumpBar2.bar.aShape
+        jumpBar1.bar.aShape,
+        jumpBar2.bar.aShape
     ]);
 
     //check if player's y coordinate is < -400, if so then the player has fallen off the map

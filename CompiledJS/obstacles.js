@@ -132,11 +132,11 @@ class JumpBar extends Obstacle {
         baseAShape.position = JSON.parse(JSON.stringify(this.position));
         const bar = constructObjectFromPrimatives([
             new PrimativeBox({ width: this.length, height: JumpBar.barThickness, depth: JumpBar.barThickness }, Vector(0, 0, 0))
-        ], 100);
+        ], 10000);
         bar.aShape.position = JSON.parse(JSON.stringify(this.position));
         bar.aShape.position.y += JumpBar.baseHeight + (JumpBar.barThickness / 2);
         bar.cBody.material = new CANNON.Material({ friction: 0 });
-        this.base = new PhysicsObject(obstacleConfig.world, baseAShape, new CANNON.Body({ mass: 0, material: new CANNON.Material({ friction: 0 }) }));
+        this.base = new PhysicsObject(obstacleConfig.world, baseAShape, new CANNON.Body({ mass: 0, material: new CANNON.Material({ friction: 1 }) }));
         this.bar = new PhysicsObject(obstacleConfig.world, bar.aShape, bar.cBody);
         const rotationSpeed = ((options === null || options === void 0 ? void 0 : options.rotationSpeed) == undefined) ? JumpBar.defaultRotationSpeed : options === null || options === void 0 ? void 0 : options.rotationSpeed;
         bar.cBody.angularVelocity.set(0, rotationSpeed, 0);
@@ -157,4 +157,4 @@ JumpBar.defaultColour = "#00ff00";
 JumpBar.defaultRotationSpeed = 1;
 JumpBar.baseSize = 50;
 JumpBar.baseHeight = 10;
-JumpBar.barThickness = 50;
+JumpBar.barThickness = 40;
