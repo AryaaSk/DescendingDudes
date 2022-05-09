@@ -83,6 +83,7 @@ class Player {
         inverseQuaternion.w *= 1; //invert by multiplying w by -1
         const cameraPosition =  multiplyQuaternionVector( inverseQuaternion, playerCameraVector );
         cameraPosition.x += this.physicsObject.cBody.position.x;
+        cameraPosition.y += this.physicsObject.cBody.position.y;
         cameraPosition.z += this.physicsObject.cBody.position.z;
         camera.position =  cameraPosition;
     }

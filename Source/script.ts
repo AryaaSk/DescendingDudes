@@ -46,7 +46,7 @@ if (isMobile == true) { //adjusting proportions so it is easier to see on mobile
         GameConfig.camera.zoom = cameraZoomHeight;
     }
 }
-const cameraOffset = Vector( 0, 500, -800 );
+const cameraOffset = Vector( 0, 300, -800 );
 
 const resetConfigs = () => {
     GameConfig.world = new CANNON.World(); //Need to remove all bodies, so that the levels don't stack on top of each other
@@ -75,7 +75,7 @@ const loadLevel = ( levelIndex: number ) => {
 
 
 //Game flow, just load each level using loadLevel( levelIndex );
-loadLevel( 0 );
+loadLevel( 1 );
 
 
 

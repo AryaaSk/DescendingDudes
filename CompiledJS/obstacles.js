@@ -30,19 +30,29 @@ class Platform extends Obstacle {
 }
 Platform.thickness = 10;
 Platform.defaultColour = "#ffff00";
+class BouncyPlatform extends Platform {
+    constructor(dimensions, position, options) {
+        super(dimensions, position, options);
+        const restituion = ((options === null || options === void 0 ? void 0 : options.resitution) == undefined) ? BouncyPlatform.defaultResitution : options.resitution;
+        this.physicalObject.cBody.material = new CANNON.Material();
+        const contactMaterial = new CANNON.ContactMaterial(GameConfig.player.physicsObject.cBody.material, this.physicalObject.cBody.material, { restitution: restituion });
+        GameConfig.world.addContactMaterial(contactMaterial);
+    }
+}
+BouncyPlatform.defaultResitution = 1.5;
 class RotatingDisc extends Obstacle {
     constructor(dimensions, position, options) {
         super();
         this.radius = dimensions.radius;
         this.position = position;
         //place a static platform as the base, and disc above it, then let disc fall onto base
-        const baseAShape = new Cylinder(RotatingDisc.baseSize, RotatingDisc.height);
-        const discAShape = new Cylinder(this.radius, RotatingDisc.height);
+        const baseAShape = new Cylinder(RotatingDisc.baseSize, RotatingDisc.thickness);
+        const discAShape = new Cylinder(this.radius, RotatingDisc.thickness);
         baseAShape.position = JSON.parse(JSON.stringify(this.position));
         discAShape.position = JSON.parse(JSON.stringify(this.position));
-        discAShape.position.y += RotatingDisc.height; //to make the disc fall onto the base
+        discAShape.position.y += RotatingDisc.thickness; //to make the disc fall onto the base
         this.base = new PhysicsObject(GameConfig.world, baseAShape, new CANNON.Body({ mass: 0, material: new CANNON.Material() })); //not actually a cylinder, just looks like it
-        this.disc = new PhysicsObject(GameConfig.world, discAShape, new CANNON.Body({ mass: 10000, material: new CANNON.Material({ friction: 1 }), shape: new CANNON.Cylinder(this.radius, this.radius, RotatingDisc.height, 8) }));
+        this.disc = new PhysicsObject(GameConfig.world, discAShape, new CANNON.Body({ mass: 10000, material: new CANNON.Material({ friction: 1 }), shape: new CANNON.Cylinder(this.radius, this.radius, RotatingDisc.thickness, 8) }));
         const rotationSpeed = ((options === null || options === void 0 ? void 0 : options.rotationSpeed) == undefined) ? RotatingDisc.defaultRotationSpeed : options === null || options === void 0 ? void 0 : options.rotationSpeed;
         this.disc.cBody.angularVelocity.set(0, rotationSpeed, 0);
         this.disc.cBody.id = -1; //user shouldn't be interacting with base so don't need to set it
@@ -63,7 +73,7 @@ class RotatingDisc extends Obstacle {
 }
 RotatingDisc.defaultColour = "#87deeb";
 RotatingDisc.defaultRotationSpeed = 1;
-RotatingDisc.height = 25;
+RotatingDisc.thickness = 25;
 RotatingDisc.baseSize = 100;
 class PendulumHammer extends Obstacle {
     constructor(dimensions, position, options) {
