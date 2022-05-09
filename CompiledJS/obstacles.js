@@ -174,11 +174,12 @@ class JumpBar extends Obstacle {
         this.position = position;
         const baseAShape = new Box(JumpBar.baseSize, JumpBar.baseHeight, JumpBar.baseSize);
         baseAShape.position = JSON.parse(JSON.stringify(this.position));
+        const [barHeight, barDepth] = [(dimensions.height == undefined) ? JumpBar.defaultBarheight : dimensions.height, (dimensions.depth == undefined) ? JumpBar.defaultBarDepth : dimensions.depth];
         const bar = constructObjectFromPrimatives([
-            new PrimativeBox({ width: this.length, height: JumpBar.barThickness, depth: JumpBar.barThickness }, Vector(0, 0, 0))
+            new PrimativeBox({ width: this.length, height: barHeight, depth: barDepth }, Vector(0, 0, 0))
         ], 10000);
         bar.aShape.position = JSON.parse(JSON.stringify(this.position));
-        bar.aShape.position.y += JumpBar.baseHeight + (JumpBar.barThickness / 2);
+        bar.aShape.position.y += (JumpBar.baseHeight / 2) + (barHeight / 2);
         bar.cBody.material = new CANNON.Material({ friction: 0 });
         this.base = new PhysicsObject(GameConfig.world, baseAShape, new CANNON.Body({ mass: 0, material: new CANNON.Material({ friction: 1 }) }));
         this.bar = new PhysicsObject(GameConfig.world, bar.aShape, bar.cBody);
@@ -199,6 +200,7 @@ class JumpBar extends Obstacle {
 }
 JumpBar.defaultColour = "#00ff00";
 JumpBar.defaultRotationSpeed = 1;
+JumpBar.defaultBarheight = 40;
+JumpBar.defaultBarDepth = 40;
 JumpBar.baseSize = 50;
 JumpBar.baseHeight = 10;
-JumpBar.barThickness = 40;

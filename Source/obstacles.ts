@@ -222,27 +222,30 @@ class PendulumHammer extends Obstacle {
 class JumpBar extends Obstacle {
     static defaultColour: string = "#00ff00";
     static defaultRotationSpeed: number = 1;
+    static defaultBarheight: number = 40;
+    static defaultBarDepth: number = 40;
     static baseSize: number = 50;
     static baseHeight: number = 10;
-    static barThickness: number = 40;
 
     length: number;
 
     base: PhysicsObject;
     bar: PhysicsObject;
 
-    constructor ( dimensions: { length: number }, position: XYZ, options?: { colour?: string, rotationSpeed?: number } ) {
+    constructor ( dimensions: { length: number, height?: number, depth?: number }, position: XYZ, options?: { colour?: string, rotationSpeed?: number } ) {
         super();
         this.length = dimensions.length;
         this.position = position;
         
         const baseAShape = new Box( JumpBar.baseSize, JumpBar.baseHeight, JumpBar.baseSize );
         baseAShape.position = JSON.parse(JSON.stringify(this.position));
+
+        const [barHeight, barDepth] = [(dimensions.height == undefined) ? JumpBar.defaultBarheight : dimensions.height, (dimensions.depth == undefined) ? JumpBar.defaultBarDepth : dimensions.depth]
         const bar = constructObjectFromPrimatives([
-            new PrimativeBox( { width: this.length, height: JumpBar.barThickness, depth: JumpBar.barThickness }, Vector(0, 0, 0 ) )
+            new PrimativeBox( { width: this.length, height: barHeight, depth: barDepth }, Vector(0, 0, 0 ) )
         ], 10000);
         bar.aShape.position = JSON.parse(JSON.stringify(this.position));
-        bar.aShape.position.y += JumpBar.baseHeight + (JumpBar.barThickness / 2);
+        bar.aShape.position.y += (JumpBar.baseHeight / 2) + (barHeight / 2);
         bar.cBody.material = new CANNON.Material( { friction: 0 } );
 
         this.base = new PhysicsObject( GameConfig.world!, baseAShape, new CANNON.Body({ mass: 0, material: new CANNON.Material( { friction: 1 } )}) );

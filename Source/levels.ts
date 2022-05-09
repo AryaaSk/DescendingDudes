@@ -110,7 +110,7 @@ levels.push(() => { //Demo level, to test obstacles
 levels.push(() => { //Level 1
     const level = new Level()
 
-    level.spawnPoint = Vector(0, 500, 0);
+    level.spawnPoint = Vector(0, 500, 4500);
 
     const spawnArea1 = new Platform( { width: 1000, depth: 2000 }, Vector(0, 0, 500), { colour: "#fcfb90" } ); //z = 1500
     const spawnArea2 = new Platform( { width: 200, depth: 500 }, Vector(0, 0, 1750), { colour: "#fcfb90" } ) //z = 2000
@@ -127,7 +127,7 @@ levels.push(() => { //Level 1
     const rotatingDisc1 = new RotatingDisc( { radius: 400 }, Vector(-500, 0, 5500), { colour: "#369eff", rotationSpeed: -1 } ); //z = 5900
     const rotatingDisc2 = new RotatingDisc( { radius: 400 }, Vector(500, 0, 5500), { colour: "#369eff" } ); //z = 5900
     const rotatingDisc3 = new RotatingDisc( { radius: 600 }, Vector(0, 0, 6600), { colour: "#369eff" } ); //z = 7200
-    const jumpBar1  = new JumpBar( { length: 1200 }, Vector(0, 50, 6600), { colour: "#ff63ef", rotationSpeed: -1 } ) //z = 7200
+    const jumpBar1  = new JumpBar( { length: 1200, height: 100 }, Vector(0, 100, 6600), { colour: "#ff63ef", rotationSpeed: -1 } ) //z = 7200
 
     const platform2 = new Platform( { width: 1000, depth: 1000 }, Vector(0, 0, 7900), { colour: "#fcfb90" } ); //z = 8400
     const ramp1 = new Platform( { width: 500, depth: 1000 }, Vector(0, 200, 8850), { colour: "#fcfb90" } ); //z = 9300, y = 410
