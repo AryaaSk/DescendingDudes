@@ -57,7 +57,7 @@ const loadLevel = (levelIndex) => {
     currentLevel.spawnPlayer(currentLevel.spawnPoint);
 };
 //Game flow, just load each level using loadLevel( levelIndex );
-loadLevel(0);
+loadLevel(1);
 const gameLoop = setInterval(() => {
     if (isMobile == false) {
         handleKeysDown();

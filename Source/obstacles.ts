@@ -57,44 +57,46 @@ class BouncyPlatform extends Platform {
 
 class MovingPlatform extends Platform {
     static defaultSpeed: number = (1 / 1) * 100 ;
+    static defaultAccuracy: number = 1;
 
     speed: number
     position1: XYZ;
     position2: XYZ;
     movementVector: XYZ;
+    accuracy: number;
 
-    constructor ( dimensions: { width: number, depth: number, thickness?: number }, position: { position1: XYZ, position2: XYZ }, options?: { colour?: string, speed?: number } ) {
+    constructor ( dimensions: { width: number, depth: number, thickness?: number }, position: { position1: XYZ, position2: XYZ }, options?: { colour?: string, speed?: number, accuracy?: number } ) {
         super( dimensions, position.position1, options );
         this.speed = (options?.speed == undefined) ? MovingPlatform.defaultSpeed : (1 / options.speed) * 100;
         this.position1 = position.position1;
         this.position2 = position.position2;
+        this.accuracy = (options?.accuracy == undefined) ? MovingPlatform.defaultAccuracy : (options.accuracy);
 
         const pos1pos2Vector = Vector( this.position2.x - this.position1.x, this.position2.y - this.position1.y, this.position2.z - this.position1.z )
         const [interpolationX, interpolationY, interpolationZ] = [ pos1pos2Vector.x / this.speed, pos1pos2Vector.y / this.speed, pos1pos2Vector.z / this.speed ]
         this.movementVector = Vector( interpolationX, interpolationY, interpolationZ );
 
-        //currently gets stuck in a loop, can be resolved by adding a start position, but I don't want to
+        this.physicalObject.cBody.mass = 1;
     }
 
     direction = 1; //1 = towards position2, -1 = towards position1
     override update() {
-        //every frame, check if the platform's position is either of the positions, if so then multiply direction by *1
-        const accuracy = 0.005;
-        const roundedP1 = Vector( Math.round(this.position1.x * accuracy), Math.round(this.position1.y * accuracy), Math.round(this.position1.z * accuracy) );
-        const roundedP2 = Vector( Math.round(this.position2.x * accuracy), Math.round(this.position2.y * accuracy), Math.round(this.position2.z * accuracy) );
-        const currentPosition = this.physicalObject.cBody.position;
-        const currentPositionRounded = Vector( Math.round(currentPosition.x * accuracy), Math.round(currentPosition.y * accuracy), Math.round(currentPosition.z * accuracy) );
+        //Use accuracy to normalize the positions, since they won't be exact, then set the platform's velocity in the vector multiplied by its direction
+        const P1Normalized = Vector( Math.round(this.position1.x * this.accuracy), Math.round(this.position1.y * this.accuracy), Math.round(this.position1.z * this.accuracy) );
+        const P2Normalized = Vector( Math.round(this.position2.x * this.accuracy), Math.round(this.position2.y * this.accuracy), Math.round(this.position2.z * this.accuracy) );
+        const currentPNormlized = Vector( Math.round(this.physicalObject.cBody.position.x * this.accuracy), Math.round(this.physicalObject.cBody.position.y * this.accuracy), Math.round(this.physicalObject.cBody.position.z * this.accuracy) );
 
-        const condition1 = (currentPositionRounded.x == roundedP1.x && currentPositionRounded.y == roundedP1.y && currentPositionRounded.z == roundedP1.z);
-        const condition2 = (currentPositionRounded.x == roundedP2.x && currentPositionRounded.y == roundedP2.y && currentPositionRounded.z == roundedP2.z);
+        const isAtPosition1 = (currentPNormlized.x == P1Normalized.x && currentPNormlized.y == P1Normalized.y && currentPNormlized.z == P1Normalized.z);
+        const isAtPosition2 = (currentPNormlized.x == P2Normalized.x && currentPNormlized.y == P2Normalized.y && currentPNormlized.z == P2Normalized.z);
 
-        if (condition1 || condition2) {
-            this.direction *= -1;
-        }
+        if (isAtPosition1 == true) { this.direction = 1; }
+        else if (isAtPosition2 == true) { this.direction = -1; }
 
-        this.physicalObject.cBody.position.x += this.movementVector.x * this.direction;
-        this.physicalObject.cBody.position.y += this.movementVector.y * this.direction;
-        this.physicalObject.cBody.position.z += this.movementVector.z * this.direction;
+        const movementVector = Vector( this.movementVector.x * this.direction, this.movementVector.y * this.direction, this.movementVector.z * this.direction )
+        this.physicalObject.cBody.position.x += movementVector.x;
+        this.physicalObject.cBody.position.y += movementVector.y;
+        this.physicalObject.cBody.position.z += movementVector.z;
+
         this.physicalObject.syncAShape();
     }
 }

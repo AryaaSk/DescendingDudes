@@ -75,7 +75,7 @@ const loadLevel = ( levelIndex: number ) => {
 
 
 //Game flow, just load each level using loadLevel( levelIndex );
-loadLevel( 0 );
+loadLevel( 1 );
 
 
 
