@@ -42,6 +42,7 @@ levels.push(() => {
     const jumpBar2 = new JumpBar({ length: 600 }, Vector(300, 5, 1500), { rotationSpeed: 3, colour: "#ff0000" });
     const movingPlatform1 = new Platform({ width: 400, depth: 200, thickness: 30 }, Vector(600, 100, 2000), { colour: "#0000ff" });
     const movingPlatform2 = new Platform({ width: 400, depth: 200, thickness: 30 }, Vector(-600, 100, 2000), { colour: "#0000ff" });
+    const newMovingPlatform = new MovingPlatform({ width: 400, depth: 200, thickness: 30 }, { position1: Vector(0, 200, 1000), position2: Vector(0, 500, 1500) }, { colour: "#ff0000", speed: 0.5 });
     const rotatingDisc2 = new RotatingDisc({ radius: 300 }, Vector(0, 0, 3000), { colour: "#ff8000", rotationSpeed: -1 });
     level.obstacles = [
         rotatingDisc1,
@@ -51,7 +52,8 @@ levels.push(() => {
         jumpBar2,
         movingPlatform1,
         movingPlatform2,
-        rotatingDisc2
+        rotatingDisc2,
+        newMovingPlatform
     ];
     level.layers = {
         bottom: [rotatingDisc1.base.aShape,
@@ -65,7 +67,8 @@ levels.push(() => {
             movingPlatform2.physicalObject.aShape],
         top: [pendulumHammer1.support.aShape, pendulumHammer1.hammer.aShape,
             jumpBar1.bar.aShape,
-            jumpBar2.bar.aShape]
+            jumpBar2.bar.aShape,
+            newMovingPlatform.physicalObject.aShape]
     };
     let movingPlatform1Direction = 5;
     let movingPlatform2Direction = -5;
