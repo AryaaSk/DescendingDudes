@@ -104,15 +104,15 @@ levels.push(() => {
     const rotatingDisc2 = new RotatingDisc({ radius: 400 }, Vector(500, 0, 5500), { colour: "#369eff" }); //z = 5900
     const rotatingDisc3 = new RotatingDisc({ radius: 600 }, Vector(0, 0, 6600), { colour: "#369eff" }); //z = 7200
     const jumpBar1 = new JumpBar({ length: 1200 }, Vector(0, 50, 6600), { colour: "#ff63ef", rotationSpeed: -1 }); //z = 7200
-    const platform2 = new Platform({ width: 1000, depth: 1000 }, Vector(0, 0, 7900), { colour: "#87deeb" }); //z = 8400
-    const ramp1 = new Platform({ width: 500, depth: 1000 }, Vector(0, 200, 8850), { colour: "#87deeb" }); //z = 9300, y = 410
+    const platform2 = new Platform({ width: 1000, depth: 1000 }, Vector(0, 0, 7900), { colour: "#fcfb90" }); //z = 8400
+    const ramp1 = new Platform({ width: 500, depth: 1000 }, Vector(0, 200, 8850), { colour: "#fcfb90" }); //z = 9300, y = 410
     const ramp1Quaternion = eulerToQuaternion(Euler(-25, 0, 0));
     ramp1.physicalObject.cBody.quaternion.set(ramp1Quaternion.x, ramp1Quaternion.y, ramp1Quaternion.z, ramp1Quaternion.w);
-    const platform3 = new Platform({ width: 500, depth: 1500 }, Vector(0, 410, 10050), { colour: "#87deeb" }); //z = 10800
-    const platform4 = new Platform({ width: 500, depth: 1500 }, Vector(0, 410, 11550), { colour: "#87deeb" }); //z = 12300
+    const platform3 = new Platform({ width: 500, depth: 1500 }, Vector(0, 410, 10050), { colour: "#fcfb90" }); //z = 10800
+    const platform4 = new Platform({ width: 500, depth: 1500 }, Vector(0, 410, 11550), { colour: "#fcfb90" }); //z = 12300
     const swingingHammer = new PendulumHammer({ height: 1000, gap: 1000, hammerReach: 900, hammerSize: 150 }, Vector(0, 410, 10800), { colour: "#ff63ef" }); //z = 12300
-    const hammerSupportPlatform1 = new Platform({ width: 500, depth: 500 }, Vector(-500, 410, 10800), { colour: "#87deeb" }); //z = 12300
-    const hammerSupportPlatform2 = new Platform({ width: 500, depth: 500 }, Vector(500, 410, 10800), { colour: "#87deeb" }); //z = 12300
+    const hammerSupportPlatform1 = new Platform({ width: 500, depth: 500 }, Vector(-500, 410, 10800), { colour: "#fcfb90" }); //z = 12300
+    const hammerSupportPlatform2 = new Platform({ width: 500, depth: 500 }, Vector(500, 410, 10800), { colour: "#fcfb90" }); //z = 12300
     const finishArea = new Platform({ width: 2000, depth: 4000 }, Vector(0, 0, 15300), { colour: "#fcfafa" }); //z = 17300
     level.obstacles = [
         spawnArea1,
