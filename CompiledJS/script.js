@@ -68,7 +68,7 @@ const showMessage = (text, permanant) => {
     }, 2000);
 };
 //Game flow, just load each level using loadLevel( levelIndex );
-loadLevel(2);
+loadLevel(1);
 const gameLoop = setInterval(() => {
     if (isMobile == false) {
         handleKeysDown();

@@ -86,7 +86,7 @@ const showMessage = (text: string, permanant?: boolean) => {
 }
 
 //Game flow, just load each level using loadLevel( levelIndex );
-loadLevel( 2 );
+loadLevel( 1 );
 
 
 
