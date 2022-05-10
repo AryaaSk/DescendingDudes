@@ -43,9 +43,9 @@ class Player {
         })
     }
 
-    update( camera: PerspectiveCamera, cameraOffset: XYZ ) {
+    update( camera: PerspectiveCamera ) {
         this.physicsObject.syncAShape();
-        this.syncCameraPosition( camera, cameraOffset );
+        this.syncCameraPosition( camera );
     }
     thirdPersonCamera( camera: PerspectiveCamera ) { //Third Person Camera
         const rotatePlayerCameraY = (angle: number) => {
@@ -55,36 +55,47 @@ class Player {
             this.physicsObject.cBody.quaternion.set( resultQuaternion.x, resultQuaternion.y, resultQuaternion.z, resultQuaternion.w );
         
             camera.rotation.y += angle; //cant sync camera's rotation since we don't have access to the player's y rotation, only quaternion
-            camera.updateRotationMatrix();
+        }
+        const rotateCameraX = (angle: number) => {
+            const [lowerBound, upperBound] = [ 90, -5 ];
+            camera.rotation.x += angle;
+            if (camera.rotation.x > lowerBound) { camera.rotation.x = lowerBound; }
+            if (camera.rotation.x < upperBound) { camera.rotation.x = upperBound; }
         }
 
         //Not using event listeners since they stack up whenever a new player object is created
         if (isMobile == false) {
             document.body.onmousemove = ($e) => {
-                const angle = $e.movementX * this.rotationSensitivity;
-                rotatePlayerCameraY( angle );
+                const yAngle = $e.movementX * this.rotationSensitivity;
+                rotatePlayerCameraY( yAngle );
+                const xAngle = $e.movementY * this.rotationSensitivity;
+                rotateCameraX( xAngle );
+                camera.updateRotationMatrix();
             }
         }
         else {
-            let previousX = 0;
+            let [previousX, previousY] = [0, 0];
             document.getElementById("renderingWindow")!.ontouchstart = ($e) => {
-                previousX = $e.targetTouches[0].clientX;
+                [previousX, previousY] = [$e.targetTouches[0].clientX, $e.targetTouches[0].clientY];
             }
             document.getElementById("renderingWindow")!.ontouchmove = ($e) => {
-                const angle = ($e.targetTouches[0].clientX - previousX) * this.mobileRotationSensitivity;
-                previousX = $e.targetTouches[0].clientX
-                rotatePlayerCameraY( angle );
+                const yAngle = ($e.targetTouches[0].clientX - previousX) * this.mobileRotationSensitivity;
+                rotatePlayerCameraY(yAngle );
+                const xAngle = ($e.targetTouches[0].clientY - previousY) * this.mobileRotationSensitivity;
+                rotateCameraX( xAngle );
+                camera.updateRotationMatrix();
+                [previousX, previousY] = [$e.targetTouches[0].clientX, $e.targetTouches[0].clientY];
             }
         }
     }
-    syncCameraPosition(camera: PerspectiveCamera, cameraOffset: XYZ) { //Sync Camera behind player, by rotating vector from player -> camera
-        const playerCameraVector = JSON.parse(JSON.stringify( cameraOffset ));
-        const inverseQuaternion = JSON.parse(JSON.stringify(this.physicsObject.aShape.quaternion));
-        inverseQuaternion.w *= 1; //invert by multiplying w by -1
-        const cameraPosition =  multiplyQuaternionVector( inverseQuaternion, playerCameraVector );
-        cameraPosition.x += this.physicsObject.cBody.position.x;
-        cameraPosition.y += this.physicsObject.cBody.position.y;
-        cameraPosition.z += this.physicsObject.cBody.position.z;
-        camera.position =  cameraPosition;
+    syncCameraPosition(camera: PerspectiveCamera) { //Sync Camera behind player, by rotating vector from player -> camera
+        const playerCameraVector = JSON.parse(JSON.stringify( CAMERA_OFFSET ));
+        const rotationQuaternion = eulerToQuaternion( Euler( camera.rotation.x, camera.rotation.y, 0 ) );
+        const newPlayerCameraVector = multiplyQuaternionVector( rotationQuaternion, playerCameraVector );
+
+        camera.position = newPlayerCameraVector;
+        camera.position.x += this.physicsObject.cBody.position.x;
+        camera.position.y += this.physicsObject.cBody.position.y;
+        camera.position.z += this.physicsObject.cBody.position.z;
     }
 }

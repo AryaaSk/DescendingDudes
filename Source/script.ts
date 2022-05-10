@@ -37,6 +37,7 @@ GameConfig.camera = new PerspectiveCamera();; //camera never gets reset so we le
 GameConfig.camera.rotation.x = 20;
 GameConfig.camera.updateRotationMatrix();
 GameConfig.camera.clipOffset = 10;;
+let CAMERA_OFFSET = Vector( 0, 100, -800 );
 
 if (isMobile == true) { //adjusting proportions so it is easier to see on mobile
     const cameraZoomWidth = (window.innerWidth) / 800;
@@ -46,7 +47,6 @@ if (isMobile == true) { //adjusting proportions so it is easier to see on mobile
         GameConfig.camera.zoom = cameraZoomHeight;
     }
 }
-const cameraOffset = Vector( 0, 300, -800 );
 
 const resetConfigs = () => {
     GameConfig.world = new CANNON.World(); //Need to remove all bodies, so that the levels don't stack on top of each other
@@ -74,8 +74,19 @@ const loadLevel = ( levelIndex: number ) => {
     
 
 
+//Extra Utilites
+const showMessage = (text: string, permanant?: boolean) => {
+    const label = document.getElementById("message")!;
+    label.innerText = text;
+    if (permanant == true) { return; } //permanant text not working for some reason
+
+    setTimeout(() => {
+        label.innerText = "";
+    }, 2000);
+}
+
 //Game flow, just load each level using loadLevel( levelIndex );
-loadLevel( 1 );
+loadLevel( 2 );
 
 
 
@@ -88,7 +99,7 @@ const gameLoop = setInterval(() => {
     GameConfig.world!.step(16 / 1000);
 
     //Sync aryaa3D Shapes
-    GameConfig.player!.update( GameConfig.camera!, cameraOffset );
+    GameConfig.player!.update( GameConfig.camera! );
     currentLevel.updateAShapes();
 
     //Render level
@@ -97,16 +108,17 @@ const gameLoop = setInterval(() => {
 
     //Check if player's y coordinate is < -400, if so then the player has fallen off the map and gets respawned
     if (GameConfig.player!.physicsObject.cBody.position.y <= -400) {
-        console.warn("Player died (y <= -400), respawning now...");
+        showMessage("Player fell off the map, respawning now...")
         currentLevel.spawnPlayer( currentLevel.respawnPoint );
     }
 
     //Check if player's z coordinate is >= current level's finishZ, if so then the player has finished the level and load next level
     if (GameConfig.player!.physicsObject.cBody.position.z >= currentLevel.finishZ) {
-        console.log(`Player has completed level ${String(currentLevelIndex)}`);
+        showMessage(`Player has completed level ${String(currentLevelIndex)}`)
 
         if (currentLevelIndex == (levels.length - 1)) {
-            console.log("Congradulations, you have finished all the levels");
+            showMessage("Congradulations, you have finished all the levels", true)
+
             clearInterval(gameLoop);
         }
         else {

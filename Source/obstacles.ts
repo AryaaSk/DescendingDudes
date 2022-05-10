@@ -1,4 +1,4 @@
-class Obstacle { //When specifying obstacle's position, user should not need to take obstacle's height into consideration, it should translate y by +(height / 2) automatically.
+class Obstacle {
     position: XYZ = Vector(0, 0, 0);
 
     constructor() {
@@ -13,7 +13,7 @@ class Obstacle { //When specifying obstacle's position, user should not need to 
 
 class Platform extends Obstacle {
     static thickness: number = 10;
-    static defaultColour: string = "#ffff00";
+    static defaultColour: string = "#fcfb90";
 
     width: number;
     depth: number;
@@ -75,8 +75,6 @@ class MovingPlatform extends Platform {
         const pos1pos2Vector = Vector( this.position2.x - this.position1.x, this.position2.y - this.position1.y, this.position2.z - this.position1.z )
         const [interpolationX, interpolationY, interpolationZ] = [ pos1pos2Vector.x / this.speed, pos1pos2Vector.y / this.speed, pos1pos2Vector.z / this.speed ]
         this.movementVector = Vector( interpolationX, interpolationY, interpolationZ );
-
-        this.physicalObject.cBody.mass = 1;
     }
 
     direction = 1; //1 = towards position2, -1 = towards position1
@@ -149,10 +147,11 @@ class RotatingDisc extends Obstacle {
     }
 }
 
-class PendulumHammer extends Obstacle {
+class PendulumHammer extends Obstacle { //On this object, the support and hammer get translated by half their height, so you don't have to worry about height then adding it
     static defaultColour: string = "#ff00ff";
     static defaultHammerSize: number = 100;
     static defaultHammerRotationSpeed: number = 2;
+    static defautOrientation: number = 0;
     static supportThickness: number = 50;
     static supportBarHeight: number = 50;
     static hammerThickness: number = 50;
@@ -164,7 +163,7 @@ class PendulumHammer extends Obstacle {
     support: PhysicsObject;
     hammer: PhysicsObject;
 
-    constructor ( dimensions: { height: number, gap: number, hammerReach: number, hammerSize?: number }, position: XYZ, options?: { colour?: string, rotationSpeed?: number } ) {
+    constructor ( dimensions: { height: number, gap: number, hammerReach: number, hammerSize?: number }, position: XYZ, options?: { colour?: string, rotationSpeed?: number, orientation?: number } ) {
         super();
         this.height = dimensions.height;
         this.gap = dimensions.gap;
@@ -187,6 +186,8 @@ class PendulumHammer extends Obstacle {
         ], 0);
         hammer.aShape.position = JSON.parse(JSON.stringify(this.position));
         hammer.aShape.position.y += (this.height) + (PendulumHammer.supportBarHeight / 2); //want hammer to look like it is hanging from the support bar
+        const hammerOrientation = (options?.orientation == undefined) ? PendulumHammer.defautOrientation : options.orientation;
+        hammer.aShape.rotation.y = hammerOrientation;
         this.hammer = new PhysicsObject( GameConfig.world!, hammer.aShape, hammer.cBody );
         
         this.support.cBody.material = new CANNON.Material( { friction: 0 } );

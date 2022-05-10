@@ -29,7 +29,7 @@ class Platform extends Obstacle {
     }
 }
 Platform.thickness = 10;
-Platform.defaultColour = "#ffff00";
+Platform.defaultColour = "#fcfb90";
 class BouncyPlatform extends Platform {
     constructor(dimensions, position, options) {
         super(dimensions, position, options);
@@ -51,7 +51,6 @@ class MovingPlatform extends Platform {
         const pos1pos2Vector = Vector(this.position2.x - this.position1.x, this.position2.y - this.position1.y, this.position2.z - this.position1.z);
         const [interpolationX, interpolationY, interpolationZ] = [pos1pos2Vector.x / this.speed, pos1pos2Vector.y / this.speed, pos1pos2Vector.z / this.speed];
         this.movementVector = Vector(interpolationX, interpolationY, interpolationZ);
-        this.physicalObject.cBody.mass = 1;
     }
     update() {
         //Use accuracy to normalize the positions, since they won't be exact, then set the platform's velocity in the vector multiplied by its direction
@@ -133,6 +132,8 @@ class PendulumHammer extends Obstacle {
         ], 0);
         hammer.aShape.position = JSON.parse(JSON.stringify(this.position));
         hammer.aShape.position.y += (this.height) + (PendulumHammer.supportBarHeight / 2); //want hammer to look like it is hanging from the support bar
+        const hammerOrientation = ((options === null || options === void 0 ? void 0 : options.orientation) == undefined) ? PendulumHammer.defautOrientation : options.orientation;
+        hammer.aShape.rotation.y = hammerOrientation;
         this.hammer = new PhysicsObject(GameConfig.world, hammer.aShape, hammer.cBody);
         this.support.cBody.material = new CANNON.Material({ friction: 0 });
         this.hammer.cBody.material = new CANNON.Material({ friction: 0 });
@@ -164,6 +165,7 @@ class PendulumHammer extends Obstacle {
 PendulumHammer.defaultColour = "#ff00ff";
 PendulumHammer.defaultHammerSize = 100;
 PendulumHammer.defaultHammerRotationSpeed = 2;
+PendulumHammer.defautOrientation = 0;
 PendulumHammer.supportThickness = 50;
 PendulumHammer.supportBarHeight = 50;
 PendulumHammer.hammerThickness = 50;
