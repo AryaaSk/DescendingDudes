@@ -26,6 +26,7 @@ let CAMERA_OFFSET = Vector( 0, 100, -800 ); //changed based on camera's x rotati
 const resetWorld = () => {
     GAME_CONFIG.world = new CANNON.World(); //Need to remove all bodies, so that the levels don't stack on top of each other
     GAME_CONFIG.world.gravity.set( 0, -9.82 * 100, 0 );
+
     GAME_CONFIG.player = new Player( GAME_CONFIG.world, GAME_CONFIG.camera! ); //Creating a new Player object with the newly created CANNON World
     GAME_CONFIG.camera!.rotation.y = 0; //Resetting camera rotation, since player rotation will also be reset
     GAME_CONFIG.camera!.updateRotationMatrix();
