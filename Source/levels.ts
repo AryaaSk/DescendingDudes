@@ -4,12 +4,12 @@ class Level { //Levels work by taking in all the references to the obstacles and
     updateCallback: (() => void) = () => {}; //DO NOT USE THIS FOR UPDATING ARYAA3D SHAPES, if the level wants to perform an action which is not performed by individual obstacles, e.g. a moving platform. 
 
     constructor() {
-        if (GameConfig.player == undefined) {
-            console.trace("Please specifify a player object in the GameConfig");
+        if (GAME_CONFIG.player == undefined) {
+            console.trace("Please specifify a player object in the GAME_CONFIG");
             return;
         }
-        if (GameConfig.camera == undefined) {
-            console.error("Please specifify a camera object in the GameConfig");
+        if (GAME_CONFIG.camera == undefined) {
+            console.error("Please specifify a camera object in the GAME_CONFIG");
             return;
         }
     }
@@ -17,7 +17,7 @@ class Level { //Levels work by taking in all the references to the obstacles and
     spawnPoint: XYZ = Vector(0, 500, 0);
     respawnPoint: XYZ = Vector(0, 500, 0);
     spawnPlayer( playerPosition: XYZ ) {
-        GameConfig.player!.physicsObject.cBody.position.set( playerPosition.x, playerPosition.y, playerPosition.z );
+        GAME_CONFIG.player!.physicsObject.cBody.position.set( playerPosition.x, playerPosition.y, playerPosition.z );
     }
 
     finishZ: number = 3000; //Z coordinate of which the player has to pass to finish, 3000 by default just so that the level is not automatically completed
@@ -29,9 +29,9 @@ class Level { //Levels work by taking in all the references to the obstacles and
     }
 
     renderLevel() { //multiple render function calls for different y-values, since we limited rotation, the items will always be on top / parallel to each other
-        GameConfig.camera!.render(this.layers.bottom); //Bottom Layer (platforms)
-        GameConfig.camera!.render(this.layers.middle); //Middle layer, for obstacles such as moving platforms and bases
-        GameConfig.camera!.render(this.layers.top.concat([GameConfig.player!.physicsObject.aShape])); //Top layer, for rendering player and player height obstacles
+        GAME_CONFIG.camera!.render(this.layers.bottom); //Bottom Layer (platforms)
+        GAME_CONFIG.camera!.render(this.layers.middle); //Middle layer, for obstacles such as moving platforms and bases
+        GAME_CONFIG.camera!.render(this.layers.top.concat([GAME_CONFIG.player!.physicsObject.aShape])); //Top layer, for rendering player and player height obstacles
     }
 }
 
@@ -40,9 +40,9 @@ class Level { //Levels work by taking in all the references to the obstacles and
 
 
 //Actual Levels
-const levels: (() => Level)[] = []; //an array of functions, which will return a level when called
+const LEVELS: (() => Level)[] = []; //an array of functions, which will return a level when called
 
-levels.push(() => { //Demo level, to test obstacles
+LEVELS.push(() => { //Demo level, to test obstacles
     const level = new Level()
 
     level.spawnPoint = Vector( 0, 500, 0 );
@@ -71,32 +71,32 @@ levels.push(() => { //Demo level, to test obstacles
 
     level.layers =  {   
         bottom: [rotatingDisc1.base.aShape,  
-                platform1.physicalObject.aShape, 
+                platform1.physicsObject.aShape, 
                 rotatingDisc2.base.aShape], 
     
         middle: [rotatingDisc1.disc.aShape,
                 jumpBar1.base.aShape,
                 jumpBar2.base.aShape,
                 rotatingDisc2.disc.aShape,
-                movingPlatform1.physicalObject.aShape,
-                movingPlatform2.physicalObject.aShape],
+                movingPlatform1.physicsObject.aShape,
+                movingPlatform2.physicsObject.aShape],
     
         top:    [pendulumHammer1.support.aShape, pendulumHammer1.hammer.aShape,
                 jumpBar1.bar.aShape,
                 jumpBar2.bar.aShape,
-                newMovingPlatform.physicalObject.aShape]
+                newMovingPlatform.physicsObject.aShape]
     };
 
     let movingPlatform1Direction = 5;
     let movingPlatform2Direction = -5;
     level.updateCallback = () => {
-        if (movingPlatform1.physicalObject.cBody.position.x >= 1400) { movingPlatform1Direction = -5; }
-        else if (movingPlatform1.physicalObject.cBody.position.x <= 600) { movingPlatform1Direction = 5; }
-        movingPlatform1.physicalObject.cBody.position.x += movingPlatform1Direction;
+        if (movingPlatform1.physicsObject.cBody.position.x >= 1400) { movingPlatform1Direction = -5; }
+        else if (movingPlatform1.physicsObject.cBody.position.x <= 600) { movingPlatform1Direction = 5; }
+        movingPlatform1.physicsObject.cBody.position.x += movingPlatform1Direction;
 
-        if (movingPlatform2.physicalObject.cBody.position.x >= -600) { movingPlatform2Direction = -5; }
-        else if (movingPlatform2.physicalObject.cBody.position.x <= -1400) { movingPlatform2Direction = 5; }
-        movingPlatform2.physicalObject.cBody.position.x += movingPlatform2Direction;
+        if (movingPlatform2.physicsObject.cBody.position.x >= -600) { movingPlatform2Direction = -5; }
+        else if (movingPlatform2.physicsObject.cBody.position.x <= -1400) { movingPlatform2Direction = 5; }
+        movingPlatform2.physicsObject.cBody.position.x += movingPlatform2Direction;
     }
 
     level.finishZ = 3000;
@@ -107,7 +107,7 @@ levels.push(() => { //Demo level, to test obstacles
 
 
 
-levels.push(() => { //Level 1
+LEVELS.push(() => { //Level 1
     const level = new Level()
 
     level.spawnPoint = Vector(0, 500, 0);
@@ -132,7 +132,7 @@ levels.push(() => { //Level 1
     const platform2 = new Platform( { width: 1000, depth: 1000 }, Vector(0, 0, 7900), { colour: "#fcfb90" } ); //z = 8400
     const ramp1 = new Platform( { width: 500, depth: 1000 }, Vector(0, 200, 8850), { colour: "#fcfb90" } ); //z = 9300, y = 410
     const ramp1Quaternion = eulerToQuaternion( Euler( -25, 0, 0 ) );
-    ramp1.physicalObject.cBody.quaternion.set( ramp1Quaternion.x, ramp1Quaternion.y, ramp1Quaternion.z, ramp1Quaternion.w );
+    ramp1.physicsObject.cBody.quaternion.set( ramp1Quaternion.x, ramp1Quaternion.y, ramp1Quaternion.z, ramp1Quaternion.w );
     const platform3 = new Platform( { width: 500, depth: 1500 }, Vector(0, 410, 10050), { colour: "#fcfb90" } ); //z = 10800
     const platform4 = new Platform( { width: 500, depth: 1500 }, Vector(0, 410, 11550), { colour: "#fcfb90" } ); //z = 12300
     const swingingHammer = new PendulumHammer( { height: 1000, gap: 1000, hammerReach: 900, hammerSize: 150 }, Vector(0, 410, 10800), { colour: "#ff63ef" }); //z = 12300
@@ -166,30 +166,30 @@ levels.push(() => { //Level 1
     ]
 
     level.layers.bottom = [
-        bouncyPlatform1.physicalObject.aShape,
-        bouncyPlatform2.physicalObject.aShape,
-        bouncyPlatform3.physicalObject.aShape,
-        bouncyPlatform4.physicalObject.aShape,
-        bouncyPlatform5.physicalObject.aShape,
-        bouncyPlatform6.physicalObject.aShape,
-        platform1.physicalObject.aShape,
+        bouncyPlatform1.physicsObject.aShape,
+        bouncyPlatform2.physicsObject.aShape,
+        bouncyPlatform3.physicsObject.aShape,
+        bouncyPlatform4.physicsObject.aShape,
+        bouncyPlatform5.physicsObject.aShape,
+        bouncyPlatform6.physicsObject.aShape,
+        platform1.physicsObject.aShape,
         //rotatingDisc1.base.aShape, //don't need to render the bases
         //rotatingDisc2.base.aShape,
         //rotatingDisc3.base.aShape
-        platform2.physicalObject.aShape,
-        platform3.physicalObject.aShape,
-        platform4.physicalObject.aShape,
-        hammerSupportPlatform1.physicalObject.aShape,
-        hammerSupportPlatform2.physicalObject.aShape,
-        finishArea.physicalObject.aShape
+        platform2.physicsObject.aShape,
+        platform3.physicsObject.aShape,
+        platform4.physicsObject.aShape,
+        hammerSupportPlatform1.physicsObject.aShape,
+        hammerSupportPlatform2.physicsObject.aShape,
+        finishArea.physicsObject.aShape
     ]
     level.layers.middle = [
-        spawnArea1.physicalObject.aShape,
-        spawnArea2.physicalObject.aShape,
+        spawnArea1.physicsObject.aShape,
+        spawnArea2.physicsObject.aShape,
         rotatingDisc1.disc.aShape,
         rotatingDisc2.disc.aShape,
         rotatingDisc3.disc.aShape,
-        ramp1.physicalObject.aShape,
+        ramp1.physicsObject.aShape,
     ]
     level.layers.top = [
         /*jumpBar1.base.aShape,*/ jumpBar1.bar.aShape,
@@ -202,7 +202,7 @@ levels.push(() => { //Level 1
 })
 
 
-levels.push(() => {
+LEVELS.push(() => {
     const level = new Level();
 
     level.spawnPoint = Vector(0, 500, 0);
@@ -265,24 +265,24 @@ levels.push(() => {
     ]
 
     level.layers.bottom = [
-        bouncyPlatform1.physicalObject.aShape,
-        hammer1LeftSupport.physicalObject.aShape, hammer1RightSupport.physicalObject.aShape,
-        hammer2LeftSupport.physicalObject.aShape, hammer2RightSupport.physicalObject.aShape,
-        hammer3LeftSupport.physicalObject.aShape, hammer3RightSupport.physicalObject.aShape,
-        hammer4LeftSupport.physicalObject.aShape, hammer4RightSupport.physicalObject.aShape,
-        finishArea.physicalObject.aShape
+        bouncyPlatform1.physicsObject.aShape,
+        hammer1LeftSupport.physicsObject.aShape, hammer1RightSupport.physicsObject.aShape,
+        hammer2LeftSupport.physicsObject.aShape, hammer2RightSupport.physicsObject.aShape,
+        hammer3LeftSupport.physicsObject.aShape, hammer3RightSupport.physicsObject.aShape,
+        hammer4LeftSupport.physicsObject.aShape, hammer4RightSupport.physicsObject.aShape,
+        finishArea.physicsObject.aShape
     ]
     level.layers.middle = [
-        spawnArea1.physicalObject.aShape,
-        platform1.physicalObject.aShape,
-        platform2.physicalObject.aShape,
-        platform3.physicalObject.aShape,
+        spawnArea1.physicsObject.aShape,
+        platform1.physicsObject.aShape,
+        platform2.physicsObject.aShape,
+        platform3.physicsObject.aShape,
     ]
     level.layers.top = [
-        movingBlock1.physicalObject.aShape,
-        movingBlock2.physicalObject.aShape,
-        movingBlock3.physicalObject.aShape,
-        movingBlock4.physicalObject.aShape,
+        movingBlock1.physicsObject.aShape,
+        movingBlock2.physicsObject.aShape,
+        movingBlock3.physicsObject.aShape,
+        movingBlock4.physicsObject.aShape,
         hammer1.support.aShape, hammer1.hammer.aShape,
         hammer2.support.aShape, hammer2.hammer.aShape,
         hammer3.support.aShape, hammer3.hammer.aShape,

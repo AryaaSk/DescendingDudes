@@ -1,74 +1,49 @@
 declare let isMobile: boolean;
 declare var JoyStick: any;
 
-//GameHelper Setup
-enableKeyListeners();
-
-let joy: any;
-let jumpPressed = false;
-if (isMobile == false) {
-    document.addEventListener('click', () => { //full screen mode
-        document.body.requestPointerLock();
-    }, { once: false })
-
-    document.getElementById("jumpButton")!.style.display = "none";
-}
-else {
-    //initialize joystick
-    joy = new JoyStick('joyDiv', {internalFillColor: "#ff0000", internalStrokeColor: "#000000", externalStrokeColor: "#000000" });
-
-    //initalize jump listener
-    document.getElementById("jumpButton")!.ontouchstart = () => {
-        jumpPressed = true;
-    }
-}
-
 //Aryaa3D Setup
 linkCanvas("renderingWindow")
 
+//GameHelper Setup
+enableKeyListeners();
+
 //Config Setups
-let GameConfig: {
+let GAME_CONFIG: {
     player?: Player,
     world?: CANNON.World,
-    camera?: PerspectiveCamera,
-} = { player: undefined, world: undefined, camera: undefined }
-
-GameConfig.camera = new PerspectiveCamera();; //camera never gets reset so we leave it outside the resetConfigs()
-GameConfig.camera.rotation.x = 20;
-GameConfig.camera.updateRotationMatrix();
-GameConfig.camera.clipOffset = 10;;
-let CAMERA_OFFSET = Vector( 0, 100, -800 );
-
-if (isMobile == true) { //adjusting proportions so it is easier to see on mobile
-    const cameraZoomWidth = (window.innerWidth) / 800;
-    const cameraZoomHeight = (window.innerHeight) / 800;
-    GameConfig.camera.zoom = cameraZoomWidth; //set to lowest
-    if (cameraZoomHeight < cameraZoomWidth) {
-        GameConfig.camera.zoom = cameraZoomHeight;
-    }
+    camera: PerspectiveCamera,
+} = { 
+    player: undefined,
+    world: undefined, 
+    camera: new PerspectiveCamera() 
 }
 
-const resetConfigs = () => {
-    GameConfig.world = new CANNON.World(); //Need to remove all bodies, so that the levels don't stack on top of each other
-    GameConfig.world.gravity.set( 0, -9.82 * 100, 0 );
-    GameConfig.player = new Player( GameConfig.world, GameConfig.camera! ); //Creating a new Player object with the newly created CANNON World
-    GameConfig.camera!.rotation.y = 0; //Resetting camera rotation, since player rotation will also be reset
-    GameConfig.camera!.updateRotationMatrix();
+GAME_CONFIG.camera.rotation.x = 20;
+GAME_CONFIG.camera.updateRotationMatrix();
+GAME_CONFIG.camera.clipOffset = 10;;
+let CAMERA_OFFSET = Vector( 0, 100, -800 ); //changed based on camera's x rotation
+
+const resetWorld = () => {
+    GAME_CONFIG.world = new CANNON.World(); //Need to remove all bodies, so that the levels don't stack on top of each other
+    GAME_CONFIG.world.gravity.set( 0, -9.82 * 100, 0 );
+    GAME_CONFIG.player = new Player( GAME_CONFIG.world, GAME_CONFIG.camera! ); //Creating a new Player object with the newly created CANNON World
+    GAME_CONFIG.camera!.rotation.y = 0; //Resetting camera rotation, since player rotation will also be reset
+    GAME_CONFIG.camera!.updateRotationMatrix();
 }
 
 //Levels
-let currentLevelIndex: number;
+let CURRENT_LEVEL_INDEX: number;
 let currentLevel: Level;
 
 const loadLevel = ( levelIndex: number ) => {
-    if (levelIndex >= levels.length) {
+    if (levelIndex >= LEVELS.length) {
         console.error(`CANNOT LOAD LEVEL ${String(levelIndex)}: invalid level index`);
         return;
     }
 
-    resetConfigs();
-    currentLevelIndex = levelIndex;
-    currentLevel = levels[levelIndex]();
+    resetWorld();
+    CURRENT_LEVEL_INDEX = levelIndex;
+    currentLevel = LEVELS[levelIndex]();
     currentLevel.spawnPlayer( currentLevel.spawnPoint );
 }
     
@@ -96,10 +71,10 @@ const gameLoop = setInterval(() => {
 
     //Update world / level
     currentLevel.updateCallback();
-    GameConfig.world!.step(16 / 1000);
+    GAME_CONFIG.world!.step(16 / 1000);
 
     //Sync aryaa3D Shapes
-    GameConfig.player!.update( GameConfig.camera! );
+    GAME_CONFIG.player!.update( GAME_CONFIG.camera! );
     currentLevel.updateAShapes();
 
     //Render level
@@ -107,53 +82,86 @@ const gameLoop = setInterval(() => {
     currentLevel.renderLevel();
 
     //Check if player's y coordinate is < -400, if so then the player has fallen off the map and gets respawned
-    if (GameConfig.player!.physicsObject.cBody.position.y <= -400) {
+    if (GAME_CONFIG.player!.physicsObject.cBody.position.y <= -400) {
         showMessage("Player fell off the map, respawning now...")
         currentLevel.spawnPlayer( currentLevel.respawnPoint );
     }
 
     //Check if player's z coordinate is >= current level's finishZ, if so then the player has finished the level and load next level
-    if (GameConfig.player!.physicsObject.cBody.position.z >= currentLevel.finishZ) {
-        showMessage(`Player has completed level ${String(currentLevelIndex)}`)
+    if (GAME_CONFIG.player!.physicsObject.cBody.position.z >= currentLevel.finishZ) {
+        showMessage(`Player has completed level ${String(CURRENT_LEVEL_INDEX)}`)
 
-        if (currentLevelIndex == (levels.length - 1)) {
+        if (CURRENT_LEVEL_INDEX == (LEVELS.length - 1)) {
             showMessage("Congradulations, you have finished all the levels", true)
 
             clearInterval(gameLoop);
         }
         else {
-            loadLevel( currentLevelIndex + 1 );
+            loadLevel( CURRENT_LEVEL_INDEX + 1 );
         }
     }
 }, 16);
 
+
 const handleKeysDown = () => {
     const pMovement = Vector(0, 0, 0);
     keysDown.forEach((key) => {
-        if (key == "w") {  pMovement.z += GameConfig.player!.speed; }
-        else if (key == "s") { pMovement.z -= GameConfig.player!.speed; }
-        else if (key == "a") { pMovement.x -= GameConfig.player!.speed; }
-        else if (key == "d") { pMovement.x += GameConfig.player!.speed; }
+        if (key == "w") {  pMovement.z += GAME_CONFIG.player!.speed; }
+        else if (key == "s") { pMovement.z -= GAME_CONFIG.player!.speed; }
+        else if (key == "a") { pMovement.x -= GAME_CONFIG.player!.speed; }
+        else if (key == "d") { pMovement.x += GAME_CONFIG.player!.speed; }
 
         else if (key == " ") { 
-            GameConfig.player!.jump( GameConfig.player!.jumpForce ); //validation happens inside player class
+            GAME_CONFIG.player!.jump( GAME_CONFIG.player!.jumpForce ); //validation happens inside player class
         }
     })
-    GameConfig.player!.moveLocal( pMovement );
+    GAME_CONFIG.player!.moveLocal( pMovement );
 
 }
+
+
+//Mobile Modifications
+if (isMobile == true) { //adjusting proportions so it is easier to see on mobile
+    const cameraZoomWidth = (window.innerWidth) / 800;
+    const cameraZoomHeight = (window.innerHeight) / 800;
+    GAME_CONFIG.camera.zoom = cameraZoomWidth; //set to lowest
+    if (cameraZoomHeight < cameraZoomWidth) {
+        GAME_CONFIG.camera.zoom = cameraZoomHeight;
+    }
+}
+
+//Mobile Controls
+let joy: any;
+let jumpPressed = false;
+if (isMobile == false) {
+    document.addEventListener('click', () => { //full screen mode
+        document.body.requestPointerLock();
+    }, { once: false })
+
+    document.getElementById("jumpButton")!.style.display = "none";
+}
+else {
+    //initialize joystick
+    joy = new JoyStick('joyDiv', {internalFillColor: "#ff0000", internalStrokeColor: "#000000", externalStrokeColor: "#000000" });
+
+    //initalize jump listener
+    document.getElementById("jumpButton")!.ontouchstart = () => {
+        jumpPressed = true;
+    }
+}
+
 const handleMobileControls = () => {
     const maxiumumRadius = 100; //joystick.width / 2, or joystick.height, since they should be set to the same
     const [x, y] = [joy.GetX(), joy.GetY()];
 
     const pMovement = Vector( x, 0, y );
-    const pMovementNormalized = Vector( pMovement.x * (GameConfig.player!.speed / maxiumumRadius), 0, pMovement.z * (GameConfig.player!.speed / maxiumumRadius) );
-    GameConfig.player!.moveLocal( pMovementNormalized );
+    const pMovementNormalized = Vector( pMovement.x * (GAME_CONFIG.player!.speed / maxiumumRadius), 0, pMovement.z * (GAME_CONFIG.player!.speed / maxiumumRadius) );
+    GAME_CONFIG.player!.moveLocal( pMovementNormalized );
 
 
     //If jump button was pressed then jumpPressed will be true
     if (jumpPressed == true) {
-        GameConfig.player!.jump( GameConfig.player!.jumpForce );
+        GAME_CONFIG.player!.jump( GAME_CONFIG.player!.jumpForce );
     }
     jumpPressed = false;
 }

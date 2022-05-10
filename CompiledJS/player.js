@@ -1,7 +1,6 @@
 "use strict";
 class Player {
     constructor(world, camera) {
-        //Constants
         this.speed = 10;
         this.jumpForce = 500;
         this.rotationSensitivity = 0.1;
@@ -15,6 +14,15 @@ class Player {
         this.physicsObject.cBody.angularDamping = 1;
         this.collisionListener();
         this.thirdPersonCamera(camera);
+        //check if there is already a playerID in local storage, if not then create and store one
+        if (localStorage.getItem("playerID") == undefined) {
+            const randomID = String(Math.floor(Math.random() * (9999999999999999 - 1000000000000000 + 1) + 1000000000000000)); //random number statistically almost guaranteed to be unique
+            this.playerID = randomID;
+            localStorage.setItem("playerID", randomID);
+        }
+        else {
+            this.playerID = localStorage.getItem("playerID");
+        }
     }
     //Methods
     moveLocal(vector) {
@@ -40,6 +48,15 @@ class Player {
     update(camera) {
         this.physicsObject.syncAShape();
         this.syncCameraPosition(camera);
+    }
+    syncCameraPosition(camera) {
+        const playerCameraVector = JSON.parse(JSON.stringify(CAMERA_OFFSET));
+        const rotationQuaternion = eulerToQuaternion(Euler(camera.rotation.x, camera.rotation.y, 0));
+        const newPlayerCameraVector = multiplyQuaternionVector(rotationQuaternion, playerCameraVector);
+        camera.position = newPlayerCameraVector;
+        camera.position.x += this.physicsObject.cBody.position.x;
+        camera.position.y += this.physicsObject.cBody.position.y;
+        camera.position.z += this.physicsObject.cBody.position.z;
     }
     thirdPersonCamera(camera) {
         const rotatePlayerCameraY = (angle) => {
@@ -83,14 +100,5 @@ class Player {
                 [previousX, previousY] = [$e.targetTouches[0].clientX, $e.targetTouches[0].clientY];
             };
         }
-    }
-    syncCameraPosition(camera) {
-        const playerCameraVector = JSON.parse(JSON.stringify(CAMERA_OFFSET));
-        const rotationQuaternion = eulerToQuaternion(Euler(camera.rotation.x, camera.rotation.y, 0));
-        const newPlayerCameraVector = multiplyQuaternionVector(rotationQuaternion, playerCameraVector);
-        camera.position = newPlayerCameraVector;
-        camera.position.x += this.physicsObject.cBody.position.x;
-        camera.position.y += this.physicsObject.cBody.position.y;
-        camera.position.z += this.physicsObject.cBody.position.z;
     }
 }
