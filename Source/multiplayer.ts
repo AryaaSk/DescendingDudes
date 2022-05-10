@@ -30,12 +30,14 @@ const firebaseRead = ( path: string ) => {
     return promise;
 };
 
-const uploadPlayer = () => {
+const UPLOAD_PLAYER_DATA = () => {
+    const msSince1970 = Date.now();
+
     const playerData = { //creating data object to send to firebase
         position: {
-                x: GAME_CONFIG.player!.physicsObject.cBody.position.x,
-                y: GAME_CONFIG.player!.physicsObject.cBody.position.y,
-                z: GAME_CONFIG.player!.physicsObject.cBody.position.z,
+                x: Math.round(GAME_CONFIG.player!.physicsObject.cBody.position.x),
+                y: Math.round(GAME_CONFIG.player!.physicsObject.cBody.position.y),
+                z: Math.round(GAME_CONFIG.player!.physicsObject.cBody.position.z),
         },
         quaternion: {
             x: GAME_CONFIG.player!.physicsObject.cBody.quaternion.x,
@@ -43,10 +45,9 @@ const uploadPlayer = () => {
             z: GAME_CONFIG.player!.physicsObject.cBody.quaternion.z,
             w: GAME_CONFIG.player!.physicsObject.cBody.quaternion.z
         },
-        playerID: GAME_CONFIG.player!.playerID
-        //also need to add a date (in ms since 1970), for the clearing players process
+        playerID: GAME_CONFIG.player!.playerID,
+        lastUpdated: msSince1970 //used when clearing players
     };
 
-    const levelIndex = CURRENT_LEVEL_INDEX; //save the playerData at path: "levels/{levelIndex}", so that players on the same level will be in the same lobby
-
+    firebaseWrite(`levels/${CURRENT_LEVEL_INDEX}/${GAME_CONFIG.player!.playerID}`, playerData) //save the playerData at path: "levels/{levelIndex}", so that players on the same level will be in the same lobby
 }

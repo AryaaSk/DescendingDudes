@@ -73,6 +73,7 @@ const gameLoop = setInterval(() => {
     //Update world / level
     currentLevel.updateCallback();
     GAME_CONFIG.world!.step(16 / 1000);
+    //UPLOAD_PLAYER_DATA(); //commented out for now so that it doesn't go to production
 
     //Sync aryaa3D Shapes
     GAME_CONFIG.player!.update( GAME_CONFIG.camera! );
