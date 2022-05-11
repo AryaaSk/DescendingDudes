@@ -8,7 +8,7 @@ class Level {
         this.respawnPoint = Vector(0, 500, 0);
         this.finishZ = 3000; //Z coordinate of which the player has to pass to finish, 3000 by default just so that the level is not automatically completed
         if (GAME_CONFIG.player == undefined) {
-            console.trace("Please specifify a player object in the GAME_CONFIG");
+            console.error("Please specifify a player object in the GAME_CONFIG");
             return;
         }
         if (GAME_CONFIG.camera == undefined) {

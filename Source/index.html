@@ -2,7 +2,7 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta id="viewport" name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
     <title>Descending Dudes</title>
 
     <script> //checking if it is onMobile
@@ -103,6 +103,11 @@
             top: 10px;
             left: 10px;
         }
+        #resetServer {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+        }
     </style>
 
 </head>
@@ -115,6 +120,7 @@
     <h1 class="mobileFriendly" id="message"></h1>
 
     <input type="button" value="Level Select" id="levelSelect">
+    <input type="button" value="Reset Server" id="resetServer"> <!-- Password: nothing321 -->
 </body>
 
 </html>

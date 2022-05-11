@@ -105,6 +105,16 @@ document.getElementById("levelSelect").onclick = () => {
         alert("Invalid level number");
     }
 };
+document.getElementById("resetServer").onclick = () => {
+    const password = prompt("Enter password to reset server");
+    if (password == "nothing321") {
+        resetServer();
+        location.reload();
+    }
+    else {
+        alert("Wrong password");
+    }
+};
 //MOVEMENT CONTROLS
 const handleKeysDown = () => {
     const pMovement = Vector(0, 0, 0);

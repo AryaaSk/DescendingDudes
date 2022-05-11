@@ -49,12 +49,16 @@ const uploadPlayerData = () => {
     firebaseWrite(`levels/${CURRENT_LEVEL_INDEX}/${GAME_CONFIG.player!.playerID}`, playerData) //save the playerData at path: "levels/{levelIndex}", so that players on the same level will be in the same lobby
 }
 
+let ref: any; let listener: any;
 let currentLevelPlayers: { [k: string] : OtherPlayer } = {};
 let OTHER_PLAYERS_A_SHAPES: Shape[] = [];
 const syncOtherPlayers = ( levelIndex: number ) => {
-    const ref = firebase.database().ref(`levels/${levelIndex}`);
+    currentLevelPlayers = {};
+    try { ref.off("value", listener) } //try and remove the listener for the old level
+    catch { }
 
-    const listener = ref.on('value', (snapshot: any) => {
+    ref = firebase.database().ref(`levels/${levelIndex}`);
+    listener = ref.on('value', (snapshot: any) => {
         const aShapes = [];
         const levelData = snapshot.val();
 
@@ -132,4 +136,10 @@ const removePlayerID = ( levelIndex: number ) => {
     if (levelIndex == undefined) { return; }
     const ref = firebase.database().ref(`levels/${levelIndex}/${GAME_CONFIG.player!.playerID}`);
     ref.remove();
+}
+const resetServer = () => {
+    const currentPlayersRef = firebase.database().ref("currentPlayers");
+    const levelsRef = firebase.database().ref("levels");
+    currentPlayersRef.remove();
+    levelsRef.remove();
 }
