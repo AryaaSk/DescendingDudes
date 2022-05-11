@@ -33,6 +33,8 @@ const loadLevel = (levelIndex) => {
     CURRENT_LEVEL_INDEX = levelIndex;
     currentLevel = LEVELS[levelIndex]();
     currentLevel.spawnPlayer(currentLevel.spawnPoint);
+    clearInactivePlayers();
+    syncOtherPlayers();
 };
 //Extra Utilites
 const showMessage = (text, permanant) => {
@@ -45,6 +47,11 @@ const showMessage = (text, permanant) => {
         label.innerText = "";
     }, 2000);
 };
+//Multiplayer
+setInterval(() => {
+    uploadPlayerData();
+}, 50);
+//syncPlayerData is called in loadLevel
 //Game flow, just load each level using loadLevel( levelIndex );
 loadLevel(1);
 const gameLoop = setInterval(() => {
@@ -57,13 +64,13 @@ const gameLoop = setInterval(() => {
     //Update world / level
     currentLevel.updateCallback();
     GAME_CONFIG.world.step(16 / 1000);
-    //UPLOAD_PLAYER_DATA(); //commented out for now so that it doesn't go to production
+    uploadPlayerData();
     //Sync aryaa3D Shapes
     GAME_CONFIG.player.update(GAME_CONFIG.camera);
     currentLevel.updateAShapes();
     //Render level
     clearCanvas();
-    currentLevel.renderLevel();
+    currentLevel.renderLevel(OTHER_PLAYERS_A_SHAPES);
     //Check if player's y coordinate is < -400, if so then the player has fallen off the map and gets respawned
     if (GAME_CONFIG.player.physicsObject.cBody.position.y <= -400) {
         showMessage("Player fell off the map, respawning now...");
@@ -81,6 +88,17 @@ const gameLoop = setInterval(() => {
         }
     }
 }, 16);
+document.getElementById("levelSelect").onclick = () => {
+    const level = prompt("Please enter a level number to go to");
+    try {
+        const levelIndex = Number(level);
+        loadLevel(levelIndex);
+    }
+    catch (_a) {
+        alert("Invalid level number");
+    }
+};
+//MOVEMENT CONTROLS
 const handleKeysDown = () => {
     const pMovement = Vector(0, 0, 0);
     keysDown.forEach((key) => {

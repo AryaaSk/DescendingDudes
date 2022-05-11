@@ -28,10 +28,10 @@ class Level { //Levels work by taking in all the references to the obstacles and
         }
     }
 
-    renderLevel() { //multiple render function calls for different y-values, since we limited rotation, the items will always be on top / parallel to each other
+    renderLevel( otherPlayers: Shape[] ) { //multiple render function calls for different y-values, since we limited rotation, the items will always be on top / parallel to each other
         GAME_CONFIG.camera!.render(this.layers.bottom); //Bottom Layer (platforms)
         GAME_CONFIG.camera!.render(this.layers.middle); //Middle layer, for obstacles such as moving platforms and bases
-        GAME_CONFIG.camera!.render(this.layers.top.concat([GAME_CONFIG.player!.physicsObject.aShape])); //Top layer, for rendering player and player height obstacles
+        GAME_CONFIG.camera!.render(this.layers.top.concat([GAME_CONFIG.player!.physicsObject.aShape]).concat(otherPlayers)); //Top layer, for rendering player and player height obstacles
     }
 }
 

@@ -110,3 +110,23 @@ class Player {
         }
     }
 }
+
+class OtherPlayer {
+    static otherPlayerColour: string = "#00ff00";
+    physicsObject: PhysicsObject;
+    playerID: String;
+
+    constructor ( world: CANNON.World, id: string ) {
+        const aShape = new Box(100, 200, 100);
+        aShape.setColour(OtherPlayer.otherPlayerColour);
+        aShape.showOutline();
+
+        this.physicsObject = new PhysicsObject( world, aShape, new CANNON.Body( { mass: 1 } ) )
+        
+        this.playerID = id;
+    }
+
+    update() {
+        this.physicsObject.syncAShape();
+    }
+}

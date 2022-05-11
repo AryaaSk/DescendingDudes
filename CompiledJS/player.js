@@ -102,3 +102,16 @@ class Player {
         }
     }
 }
+class OtherPlayer {
+    constructor(world, id) {
+        const aShape = new Box(100, 200, 100);
+        aShape.setColour(OtherPlayer.otherPlayerColour);
+        aShape.showOutline();
+        this.physicsObject = new PhysicsObject(world, aShape, new CANNON.Body({ mass: 1 }));
+        this.playerID = id;
+    }
+    update() {
+        this.physicsObject.syncAShape();
+    }
+}
+OtherPlayer.otherPlayerColour = "#00ff00";

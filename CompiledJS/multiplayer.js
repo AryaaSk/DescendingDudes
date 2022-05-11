@@ -1,5 +1,5 @@
 "use strict";
-//Handles the data flow from Client to Server (firebase)
+//Handles the data flow from Client to Server (firebase), as well as rendering the other players
 //FIREBASE FUNCTIONS
 const firebaseConfig = {
     apiKey: "AIzaSyANoLkbbB6zA67Y3PmaFl0JtdV3ajw4t4A",
@@ -16,17 +16,7 @@ const firebaseWrite = (path, data) => {
     const ref = firebase.database().ref(path);
     ref.set(data);
 };
-const firebaseRead = (path) => {
-    const promise = new Promise((resolve) => {
-        const ref = firebase.database().ref(path);
-        ref.on('value', (snapshot) => {
-            const data = snapshot.val();
-            resolve(data);
-        });
-    });
-    return promise;
-};
-const UPLOAD_PLAYER_DATA = () => {
+const uploadPlayerData = () => {
     const msSince1970 = Date.now();
     const playerData = {
         position: {
@@ -38,10 +28,62 @@ const UPLOAD_PLAYER_DATA = () => {
             x: GAME_CONFIG.player.physicsObject.cBody.quaternion.x,
             y: GAME_CONFIG.player.physicsObject.cBody.quaternion.y,
             z: GAME_CONFIG.player.physicsObject.cBody.quaternion.z,
-            w: GAME_CONFIG.player.physicsObject.cBody.quaternion.z
+            w: GAME_CONFIG.player.physicsObject.cBody.quaternion.w
         },
         playerID: GAME_CONFIG.player.playerID,
         lastUpdated: msSince1970 //used when clearing players
     };
     firebaseWrite(`levels/${CURRENT_LEVEL_INDEX}/${GAME_CONFIG.player.playerID}`, playerData); //save the playerData at path: "levels/{levelIndex}", so that players on the same level will be in the same lobby
+};
+let currentLevelPlayers = {};
+let OTHER_PLAYERS_A_SHAPES = [];
+const syncOtherPlayers = () => {
+    const ref = firebase.database().ref(`levels/${CURRENT_LEVEL_INDEX}`);
+    ref.on('value', (snapshot) => {
+        const aShapes = [];
+        const levelData = snapshot.val();
+        for (const playerID in levelData) {
+            if (playerID == GAME_CONFIG.player.playerID) {
+                continue;
+            }
+            const playerData = levelData[playerID];
+            const position = playerData.position;
+            const quaternion = playerData.quaternion;
+            if (currentLevelPlayers[playerID] == undefined) { //when the player has not been created before, we just add it to the list
+                const player = new OtherPlayer(GAME_CONFIG.world, playerData.ID);
+                currentLevelPlayers[playerID] = player;
+            }
+            else {
+                currentLevelPlayers[playerID].physicsObject.cBody.position.set(position.x, position.y, position.z);
+                currentLevelPlayers[playerID].physicsObject.cBody.quaternion.set(quaternion.x, quaternion.y, quaternion.z, quaternion.w);
+                currentLevelPlayers[playerID].update();
+            }
+            aShapes.push(currentLevelPlayers[playerID].physicsObject.aShape);
+        }
+        OTHER_PLAYERS_A_SHAPES = aShapes;
+    });
+};
+const clearInactivePlayers = () => {
+    //go through the players in the current level, if your (msSince1970) - their (msSince1970) is > 10000, then remove them
+    const msSince1970 = Date.now();
+    const deletePlayerIDs = [];
+    const ref = firebase.database().ref(`levels/${CURRENT_LEVEL_INDEX}`);
+    ref.once('value').then((snapshot) => {
+        const levelData = snapshot.val();
+        for (const playerID in levelData) {
+            if (playerID == GAME_CONFIG.player.playerID) {
+                continue;
+            }
+            const playerData = levelData[playerID];
+            const playerMsSince1970 = playerData.lastUpdated;
+            const difference = msSince1970 - playerMsSince1970;
+            if (difference > 10000) { //1 minute
+                deletePlayerIDs.push(playerID);
+            }
+        }
+        for (const playerID of deletePlayerIDs) {
+            const ref = firebase.database().ref(`levels/${CURRENT_LEVEL_INDEX}/${playerID}`);
+            ref.remove();
+        }
+    });
 };
