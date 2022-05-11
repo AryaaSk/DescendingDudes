@@ -21,7 +21,7 @@ const firebaseWrite = ( path: string, data: any ) => {
 };
 
 const uploadPlayerData = () => {
-    const msSince1970 = Date.now();
+    const secondsSince1970 = Math.round(Date.now() / 1000);
 
     const playerData = { //creating data object to send to firebase
         position: {
@@ -36,7 +36,7 @@ const uploadPlayerData = () => {
             w: GAME_CONFIG.player!.physicsObject.cBody.quaternion.w
         },
         playerID: GAME_CONFIG.player!.playerID,
-        lastUpdated: msSince1970 //used when clearing players
+        lastUpdated: secondsSince1970 //used when clearing players
     };
 
     firebaseWrite(`levels/${CURRENT_LEVEL_INDEX}/${GAME_CONFIG.player!.playerID}`, playerData) //save the playerData at path: "levels/{levelIndex}", so that players on the same level will be in the same lobby
@@ -76,8 +76,8 @@ const syncOtherPlayers = () => {
 }
 
 const clearInactivePlayers = () => {
-    //go through the players in the current level, if your (msSince1970) - their (msSince1970) is > 10000, then remove them
-    const msSince1970 = Date.now();
+    //go through the players in the current level, if your (seconds since 1970) - their (seconds since 1970) is > 10, then remove them
+    const secondsSince1970 = Math.round(Date.now() / 1000);
     const deletePlayerIDs: string[] = [];
 
     const ref = firebase.database().ref(`levels/${CURRENT_LEVEL_INDEX}`);
@@ -88,10 +88,10 @@ const clearInactivePlayers = () => {
             if (playerID == GAME_CONFIG.player!.playerID) { continue; }
 
             const playerData = levelData[playerID];
-            const playerMsSince1970 = playerData.lastUpdated;
-            const difference = msSince1970 - playerMsSince1970;
+            const playerSecondsSince1970 = playerData.lastUpdated;
+            const difference = secondsSince1970 - playerSecondsSince1970;
 
-            if (difference > 10000) { //10 seconds
+            if (difference > 10) { //10 seconds
                 deletePlayerIDs.push(playerID);
             }
         }
