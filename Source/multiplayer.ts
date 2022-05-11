@@ -91,7 +91,7 @@ const clearInactivePlayers = () => {
             const playerMsSince1970 = playerData.lastUpdated;
             const difference = msSince1970 - playerMsSince1970;
 
-            if (difference > 10000) { //1 minute
+            if (difference > 10000) { //10 seconds
                 deletePlayerIDs.push(playerID);
             }
         }
