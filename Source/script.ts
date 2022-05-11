@@ -42,13 +42,17 @@ const loadLevel = ( levelIndex: number ) => {
         return;
     }
 
+    //before changing CURRENT_LEVEL_INDEX, remove the playerID from the current level in firebase
+    removePlayerID( CURRENT_LEVEL_INDEX );
+
     resetWorld();
     CURRENT_LEVEL_INDEX = levelIndex;
     currentLevel = LEVELS[levelIndex]();
     currentLevel.spawnPlayer( currentLevel.spawnPoint );
 
-    clearInactivePlayers();
-    syncOtherPlayers();
+    clearInactivePlayers(levelIndex).then(() => {
+        syncOtherPlayers( CURRENT_LEVEL_INDEX ); //clear inactive players before syncing them to avoid creating unnessecary physicsObjects
+    })
 }
     
 
@@ -65,18 +69,23 @@ const showMessage = (text: string, permanant?: boolean) => {
 }
 
 
-
-//Multiplayer
-setInterval(() => {
-    uploadPlayerData();
-}, 50);
-//syncPlayerData is called in loadLevel
-
-
 //Game flow, just load each level using loadLevel( levelIndex );
 loadLevel( 1 );
 
 
+
+//Multiplayer
+setInterval(() => {
+    uploadPlayerData(); //syncPlayerData is called in loadLevel
+}, 50);
+updateLastOnline(); //update as soon as loaded, and then update every 5 seconds
+setInterval(() => {
+    updateLastOnline();
+}, 5000);
+
+
+
+//Game loop
 const gameLoop = setInterval(() => {
     if (isMobile == false) { handleKeysDown(); }
     else { handleMobileControls(); }
@@ -106,7 +115,6 @@ const gameLoop = setInterval(() => {
 
         if (CURRENT_LEVEL_INDEX == (LEVELS.length - 1)) {
             showMessage("Congradulations, you have finished all the levels", true)
-
             clearInterval(gameLoop);
         }
         else {

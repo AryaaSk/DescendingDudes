@@ -20,8 +20,16 @@ const firebaseWrite = ( path: string, data: any ) => {
     ref.set(data);
 };
 
+
+
+
+
+
+//Uploading and Download Player Data
 const uploadPlayerData = () => {
-    const secondsSince1970 = Math.round(Date.now() / 1000);
+    const roundNumber = (number: number) => { //rounds to nearest 0.001
+        return Math.round(number * 1000) / 1000;
+    }
 
     const playerData = { //creating data object to send to firebase
         position: {
@@ -30,13 +38,12 @@ const uploadPlayerData = () => {
                 z: Math.round(GAME_CONFIG.player!.physicsObject.cBody.position.z),
         },
         quaternion: {
-            x: GAME_CONFIG.player!.physicsObject.cBody.quaternion.x,
-            y: GAME_CONFIG.player!.physicsObject.cBody.quaternion.y,
-            z: GAME_CONFIG.player!.physicsObject.cBody.quaternion.z,
-            w: GAME_CONFIG.player!.physicsObject.cBody.quaternion.w
+            x: roundNumber(GAME_CONFIG.player!.physicsObject.cBody.quaternion.x),
+            y: roundNumber(GAME_CONFIG.player!.physicsObject.cBody.quaternion.y),
+            z: roundNumber(GAME_CONFIG.player!.physicsObject.cBody.quaternion.z),
+            w: roundNumber(GAME_CONFIG.player!.physicsObject.cBody.quaternion.w)
         },
         playerID: GAME_CONFIG.player!.playerID,
-        lastUpdated: secondsSince1970 //used when clearing players
     };
 
     firebaseWrite(`levels/${CURRENT_LEVEL_INDEX}/${GAME_CONFIG.player!.playerID}`, playerData) //save the playerData at path: "levels/{levelIndex}", so that players on the same level will be in the same lobby
@@ -44,10 +51,10 @@ const uploadPlayerData = () => {
 
 let currentLevelPlayers: { [k: string] : OtherPlayer } = {};
 let OTHER_PLAYERS_A_SHAPES: Shape[] = [];
-const syncOtherPlayers = () => {
-    const ref = firebase.database().ref(`levels/${CURRENT_LEVEL_INDEX}`);
+const syncOtherPlayers = ( levelIndex: number ) => {
+    const ref = firebase.database().ref(`levels/${levelIndex}`);
 
-    ref.on('value', (snapshot: any) => {
+    const listener = ref.on('value', (snapshot: any) => {
         const aShapes = [];
         const levelData = snapshot.val();
 
@@ -75,30 +82,54 @@ const syncOtherPlayers = () => {
     });
 }
 
-const clearInactivePlayers = () => {
-    //go through the players in the current level, if your (seconds since 1970) - their (seconds since 1970) is > 10, then remove them
+
+//Updating and removing active/inactive players
+const updateLastOnline = () => {
     const secondsSince1970 = Math.round(Date.now() / 1000);
-    const deletePlayerIDs: string[] = [];
+    firebaseWrite(`currentPlayers/${GAME_CONFIG.player!.playerID}/lastOnline`, secondsSince1970);
+}
 
-    const ref = firebase.database().ref(`levels/${CURRENT_LEVEL_INDEX}`);
-    ref.once('value').then((snapshot: any) => {
-        const levelData = snapshot.val();
+const clearInactivePlayers = ( levelIndex: number ) => {
+    //go through the currentPlayers directory in firebase, check if their lastOnline is > 10 seconds ago
+    //if so then remove them from the current level so that they aren't interfering
+
+    const promise = new Promise((resolve) => {
+        const secondsSince1970 = Math.round(Date.now() / 1000);
+        const deletePlayerIDs: string[] = [];
+
+        const ref = firebase.database().ref(`currentPlayers`);
+        ref.once('value').then((snapshot: any) => {
+            const currentPlayersData = snapshot.val();
         
-        for (const playerID in levelData) {
-            if (playerID == GAME_CONFIG.player!.playerID) { continue; }
+            for (const playerID in currentPlayersData) {
+                if (playerID == GAME_CONFIG.player!.playerID) { continue; }
 
-            const playerData = levelData[playerID];
-            const playerSecondsSince1970 = playerData.lastUpdated;
-            const difference = secondsSince1970 - playerSecondsSince1970;
+                const playerSecondsSince1970 = currentPlayersData[playerID].lastOnline;
+                const difference = secondsSince1970 - playerSecondsSince1970;
 
-            if (difference > 10) { //10 seconds
-                deletePlayerIDs.push(playerID);
+                if (difference > 10) { //10 seconds
+                    deletePlayerIDs.push(playerID);
+                }
             }
-        }
 
-        for (const playerID of deletePlayerIDs) {
-            const ref = firebase.database().ref(`levels/${CURRENT_LEVEL_INDEX}/${playerID}`);
-            ref.remove();
-        }
-    });
+
+            for (let i = 0; i != deletePlayerIDs.length; i += 1) {
+                const playerID = deletePlayerIDs[i];
+                const ref = firebase.database().ref(`levels/${levelIndex}/${playerID}`);
+                ref.remove();
+            }
+
+            resolve("Removed inactive players");
+        });
+    })
+    return promise;
+}
+
+
+
+const removePlayerID = ( levelIndex: number ) => {
+    //removes the playerID from the level in firebase
+    if (levelIndex == undefined) { return; }
+    const ref = firebase.database().ref(`levels/${levelIndex}/${GAME_CONFIG.player!.playerID}`);
+    ref.remove();
 }
