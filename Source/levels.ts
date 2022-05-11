@@ -39,10 +39,11 @@ class Level { //Levels work by taking in all the references to the obstacles and
 
 
 
-//Actual Levels
 const LEVELS: (() => Level)[] = []; //an array of functions, which will return a level when called
 
-LEVELS.push(() => { //Demo level, to test obstacles
+
+//Demo level, to test obstacles
+LEVELS.push(() => {
     const level = new Level()
 
     level.spawnPoint = Vector( 0, 500, 0 );
@@ -54,7 +55,7 @@ LEVELS.push(() => { //Demo level, to test obstacles
     const jumpBar2 = new JumpBar( { length: 600 }, Vector(300, 5, 1500), { rotationSpeed: 3, colour: "#ff0000" });
     const movingPlatform1 = new Platform( { width: 400, depth: 200, thickness: 30 }, Vector( 600, 100, 2000 ), { colour: "#0000ff" });
     const movingPlatform2 = new Platform( { width: 400, depth: 200, thickness: 30 }, Vector( -600, 100, 2000 ), { colour: "#0000ff" });
-    const newMovingPlatform = new MovingPlatform( { width: 400, depth: 200, thickness: 300 }, { position1: Vector( 400, 100, 1000 ), position2: Vector( -400, 100, 1000 ) }, { colour: "#ff0000", speed: 0.5 });
+    const newMovingPlatform = new MovingPlatform( { width: 400, depth: 200, thickness: 100 }, { position1: Vector( 400, 100, 1000 ), position2: Vector( -400, 100, 1000 ) }, { colour: "#ff0000", speed: 0.5 });
     const rotatingDisc2 = new RotatingDisc( { radius: 300 }, Vector(0, 0, 3000), { colour: "#ff8000", rotationSpeed: -1 });
 
     level.obstacles =  [
@@ -106,7 +107,7 @@ LEVELS.push(() => { //Demo level, to test obstacles
 
 
 
-
+//Actual Levels
 LEVELS.push(() => { //Level 1
     const level = new Level()
 
