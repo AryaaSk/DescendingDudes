@@ -1,5 +1,6 @@
 "use strict";
 //Handles the data flow from Client to Server (firebase), as well as rendering the other players
+let MULTIPLAYER_ENABLED = true;
 //FIREBASE FUNCTIONS
 const firebaseConfig = {
     apiKey: "AIzaSyANoLkbbB6zA67Y3PmaFl0JtdV3ajw4t4A",

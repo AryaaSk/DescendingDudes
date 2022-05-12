@@ -296,3 +296,86 @@ LEVELS.push(() => {
 
     return level;
 });
+
+
+
+LEVELS.push(() => {
+    const level = new Level();
+
+    level.spawnPoint = Vector( 0, 2000, -600 );
+    level.respawnPoint = Vector( 0, 2000, -600 );
+
+    const spawnArea = new Platform( { width: 1000, depth: 2000 }, Vector(0, 1500, -600 ) ); //z = 400
+
+    const slide1 = new Platform( { width: 1000, depth: 4123 }, Vector(0, 500, 3200 ), { colour: "#369eff" }); //z = 5200
+    slide1.physicsObject.cBody.quaternion.setFromEuler( toRadians(14.04), toRadians(0), toRadians(0) ); //z = 5200 
+    slide1.physicsObject.cBody.material = new CANNON.Material( { friction: 0 } ); //z = 5200
+
+    const bouncyBlock1 = new BouncyPlatform( { width: 200, depth: 200, thickness: 200 }, Vector(-250, 880, 2000), { colour: "#ff63ef", resitution: 2 } );
+    const bouncyBlock2 = new BouncyPlatform( { width: 200, depth: 200, thickness: 200 }, Vector(310, 740, 2700), { colour: "#ff63ef", resitution: 2 } );
+    const bouncyBlock3 = new BouncyPlatform( { width: 200, depth: 200, thickness: 200 }, Vector(-240, 550, 3400), { colour: "#ff63ef", resitution: 2 } );
+    const bouncyBlock4 = new BouncyPlatform( { width: 200, depth: 200, thickness: 200 }, Vector(100, 300, 4400), { colour: "#ff63ef", resitution: 2 } );
+
+    const platform1 = new Platform( { width: 1000, depth: 1000 }, Vector(0, 0, 5900) ); //z = 6400
+
+    const rotatingDisc1 = new RotatingDisc( { radius: 400 }, Vector( 0, 0, 6900 ), { colour: "#369eff" }); //z = 7300
+    const jumpBar1 = new JumpBar( { length: 800 },Vector( 0, 50, 6900 ), { colour: "#ff63ef", rotationSpeed: -1 } );
+
+    const movingPlatform1 = new MovingPlatform( { width: 500, depth: 500, thickness: 30 }, { position1: Vector(-250, 0, 7650), position2: Vector(-250, 1000, 7650) }, { colour: "#ff63ef" }); //z = 7900
+    const movingPlatform2 = new MovingPlatform( { width: 500, depth: 500, thickness: 30  }, { position1: Vector(250, 1000, 7650), position2: Vector(250, 0, 7650) }, { colour: "#ff63ef" } ); //z = 7900
+
+    const sidePlatform1 = new Platform( { width: 500, depth: 4000 }, Vector( -750, 600, 10000 ) ); //z = 12000
+    const sidePlatform2 = new Platform( { width: 500, depth: 4000 }, Vector( 750, 600, 10000 ) ); //z = 12000
+    const platform2 = new Platform( { width: 1000, depth: 4000 }, Vector( 0, 1000, 10000 ) ); //z = 12000
+    const hammer = new PendulumHammer( { height: 1400, gap: 1500, hammerReach: 900, hammerSize: 200 }, Vector(0, 600, 10000), { orientation: 90, rotationSpeed: 4 }); //z = 12000
+    hammer.support.aShape.setColour("#ff63ef");
+    hammer.hammer.aShape.setColour("#369eff");
+
+    const finishArea = new Platform( { width: 1500, depth: 4000 }, Vector(0, 900, 14500), { colour: "#fcfafa" } ); //z = 16500
+
+    level.obstacles = [
+        spawnArea,
+        slide1,
+        platform1,
+        rotatingDisc1,
+        jumpBar1,
+        movingPlatform1,
+        movingPlatform2,
+        sidePlatform1,
+        sidePlatform2,
+        platform2,
+        hammer,
+        finishArea,
+        bouncyBlock1,
+        bouncyBlock2,
+        bouncyBlock3,
+        bouncyBlock4
+    ]
+
+    level.layers.bottom = [
+        slide1.physicsObject.aShape,
+        platform1.physicsObject.aShape,
+        rotatingDisc1.disc.aShape,
+        sidePlatform1.physicsObject.aShape,
+        sidePlatform2.physicsObject.aShape,
+        finishArea.physicsObject.aShape,
+    ]
+    level.layers.middle = [
+        spawnArea.physicsObject.aShape,
+        movingPlatform1.physicsObject.aShape,
+        movingPlatform2.physicsObject.aShape,
+        platform2.physicsObject.aShape
+    ]
+    level.layers.top = [
+        jumpBar1.bar.aShape,
+        hammer.support.aShape, hammer.hammer.aShape,
+        bouncyBlock1.physicsObject.aShape,
+        bouncyBlock2.physicsObject.aShape,
+        bouncyBlock3.physicsObject.aShape,
+        bouncyBlock4.physicsObject.aShape
+    ]
+
+    level.finishZ = 14500;
+
+    return level;
+})

@@ -1,5 +1,5 @@
 //Handles the data flow from Client to Server (firebase), as well as rendering the other players
-
+let MULTIPLAYER_ENABLED = true;
 declare const firebase: any;
 
 //FIREBASE FUNCTIONS

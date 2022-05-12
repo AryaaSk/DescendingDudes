@@ -30,14 +30,18 @@ const loadLevel = (levelIndex) => {
         return;
     }
     //before changing CURRENT_LEVEL_INDEX, remove the playerID from the current level in firebase
-    removePlayerID(CURRENT_LEVEL_INDEX);
+    if (MULTIPLAYER_ENABLED == true) {
+        removePlayerID(CURRENT_LEVEL_INDEX);
+    }
     resetWorld();
     CURRENT_LEVEL_INDEX = levelIndex;
     currentLevel = LEVELS[levelIndex]();
     currentLevel.spawnPlayer(currentLevel.spawnPoint);
-    clearInactivePlayers(levelIndex).then(() => {
-        syncOtherPlayers(CURRENT_LEVEL_INDEX); //clear inactive players before syncing them to avoid creating unnessecary physicsObjects
-    });
+    if (MULTIPLAYER_ENABLED == true) {
+        clearInactivePlayers(levelIndex).then(() => {
+            syncOtherPlayers(CURRENT_LEVEL_INDEX); //clear inactive players before syncing them to avoid creating unnessecary physicsObjects
+        });
+    }
 };
 //Extra Utilites
 const showMessage = (text, permanant) => {
@@ -53,13 +57,15 @@ const showMessage = (text, permanant) => {
 //Game flow, just load each level using loadLevel( levelIndex );
 loadLevel(1);
 //Multiplayer
-setInterval(() => {
-    uploadPlayerData(); //syncPlayerData is called in loadLevel
-}, 50);
-updateLastOnline(); //update as soon as loaded, and then update every 5 seconds
-setInterval(() => {
-    updateLastOnline();
-}, 5000);
+if (MULTIPLAYER_ENABLED == true) {
+    setInterval(() => {
+        uploadPlayerData(); //syncPlayerData is called in loadLevel
+    }, 50);
+    updateLastOnline(); //update as soon as loaded, and then update every 5 seconds
+    setInterval(() => {
+        updateLastOnline();
+    }, 5000);
+}
 //Game loop
 const gameLoop = setInterval(() => {
     if (isMobile == false) {
@@ -71,7 +77,6 @@ const gameLoop = setInterval(() => {
     //Update world / level
     currentLevel.updateCallback();
     GAME_CONFIG.world.step(16 / 1000);
-    uploadPlayerData();
     //Sync aryaa3D Shapes
     GAME_CONFIG.player.update(GAME_CONFIG.camera);
     currentLevel.updateAShapes();
