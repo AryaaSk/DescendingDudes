@@ -61,6 +61,9 @@ Everytime a player loads a new level, they check the lastOnline data, and check 
 
 Then I used firebase realtime listners, to listen for changes to other players positions and rotations, and then update them on the clients game.
 
+![Multiplayer Preview](https://github.com/AryaaSk/DescendingDudes/blob/master/Previews/Multiplayer.png?raw=true)
+*Other players are green to avoid confusion with the local player*
+
 ### Game loop
 A funtion called loadLevels( levelIndex ), is used to load levels, inside of the function it resets the CANNON world, to remove the old rigid bodies and add the new ones, then runs the function at **LEVELS[levelIndex]**, and sets the return value to a function called **currentLevel**. 
 
