@@ -1,6 +1,6 @@
 # Descending Dudes
 
-### Trying to create a clone of games such as Fall Guys and Stumble Guys using aryaa3D, with CannonJS for physics.
+### Creating a 3D platformer, inspired by games such as Fall Guys, using my 3D Engine (aryaa3D), and CannonJS for physics
 
 **URL: https://aryaask.github.io/DescendingDudes/Source**
 
