@@ -2,14 +2,20 @@
 
 ### Trying to create a clone of games such as Fall Guys and Stumble Guys using aryaa3D, with CannonJS for physics.
 
-URL: https://aryaask.github.io/DescendingDudes/Source
+**URL: https://aryaask.github.io/DescendingDudes/Source**
+
+### Controls
+On PC/Desktop, the controls are just WASD to move and SPACE to jump. Use the mouse to rotate the player and camera around.
+
+On mobile, the controls appear at the bottom of the screen, the joystick is to move, and the jump button is used to jump. Drag on the screen to rotate the player and camera around
+*I am using [JoystickJS](https://github.com/bobboteck/JoyStick) for the joystick*
 
 ## Previews
 Here are some previews
 
-![Level 1 Preview](https://github.com/AryaaSk/DescendingDudes/tree/master/Previews/Level1.png?raw=true)
+![Level 1 Preview](https://github.com/AryaaSk/DescendingDudes/blob/master/Previews/Level1.png?raw=true)
 
-![Level 3 Preview](https://github.com/AryaaSk/DescendingDudes/tree/master/Previews/Level3.png?raw=true)
+![Level 3 Preview](https://github.com/AryaaSk/DescendingDudes/blob/master/Previews/Level3.png?raw=true)
 
 ## How it works
 ### Obstacles
@@ -46,7 +52,14 @@ The level class has 6 attributes to customize:
 ### Multiplayer
 I used Firebase Realtime Database to add multiplayer functionality inside the game, each level is like a lobby, and you can see all other players inside the level at the same time (other players are green).
 
-Apart from the main game loop, there are also 2 other loops running, 
+When you load the game for the first time, you are assigned a playerID which is a random number, almost statistically guaranteed to be unique, and then saved to local storage, everytime you open the website after this it is loaded from local storage.
+
+Apart from the main game loop, there are also 2 other loops running, an uploadPlayerData() loop which runs every 50ms, and an updateLastOnline() loop which runs every 5000ms.
+
+The player's position and quaternion is saved to a the path of **"levels/{levelIndex}/{playerID}"** in firebase, and the lastOnline is the **seconds since 1970**, saved in a different data location to avoid updating the actual player positions and rotations.
+Everytime a player loads a new level, they check the lastOnline data, and check if there are any playerIDs which were last updated more than 10 seconds ago, if so then they try and remove them from the current level. This creates a system where inactive players are removed from levels automatically, however there is still a Reset Server button in case this system doesn't work properly.
+
+Then I used firebase realtime listners, to listen for changes to other players positions and rotations, and then update them on the clients game.
 
 ### Game loop
 A funtion called loadLevels( levelIndex ), is used to load levels, inside of the function it resets the CANNON world, to remove the old rigid bodies and add the new ones, then runs the function at **LEVELS[levelIndex]**, and sets the return value to a function called **currentLevel**. 
