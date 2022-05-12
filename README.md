@@ -68,7 +68,7 @@ The currentLevel variable is then used inside of the main gameLoop, which carrie
 - **Update CANNON World and Level**
 - **Sync aryaa3D Shapes, as well as the player's aryaa3D Shape** 
 - **Render the actual level, using the currentLevel.renderLevel() function**
-- **Check players coordinates**: Check if player's y coordinate is <= -400, if so then respawn, or if the player's z coordinate is >= currentLevel.finishZ, if so then progress onto next level.
+- **Check players coordinates**:\ Check if player's y coordinate is <= -400, if so then respawn, or if the player's z coordinate is >= currentLevel.finishZ, if so then progress onto next level.
 
 *There are more processes, but this is the simplified loop*
 
